@@ -9,7 +9,7 @@ from django.utils.text import slugify
 from .models import WikiArticle, WikiCategory, WikiArticleRevision, WikiArticleReports
 from deep_translator import GoogleTranslator
 import requests
-
+from django.db import IntegrityError
 TEAM_NAME = "team6"
 
 # --- Base views ---
@@ -192,15 +192,18 @@ def report_article(request, slug):
     
     if request.method == "POST":
         reporter_id = request.user.id 
-        
-        WikiArticleReports.objects.create(
-            article=article,
-            reporter_user_id=reporter_id,
-            report_type=request.POST.get('type', 'other'),
-            description=request.POST.get('desc', '')
-        )
-        return render(request, 'team6/report_success.html', {'article': article})
-    
+        try:
+            WikiArticleReports.objects.create(
+                article=article,
+                reporter_user_id=reporter_id,
+                report_type=request.POST.get('type', 'other'),
+                description=request.POST.get('desc', '')
+            )
+            return render(request, 'team6/report_success.html', {'article': article})
+        except IntegrityError:
+            # این خطا زمانی رخ می‌دهد که کاربر قبلاً برای این مقاله گزارش ثبت کرده باشد
+            messages.warning(request, "شما قبلاً این مقاله را گزارش داده‌اید و گزارش شما در دست بررسی است.")
+            return redirect('team6:article_detail', slug=slug)
     return render(request, 'team6/article_report.html', {'article': article})
 
 # نمایش نسخه‌ها
@@ -214,14 +217,18 @@ def article_revisions(request, slug):
 
 # نمایش جزئیات مقاله
 def article_detail(request, slug):
-    article = get_object_or_404(WikiArticle, slug=slug)
-    
-    # افزایش بازدید
-    if hasattr(article, 'view_count'):
-        article.view_count += 1
-        article.save()
-    
-    return render(request, 'team6/article_detail.html', {'article': article})
+    try:
+        article = get_object_or_404(WikiArticle, slug=slug)
+        
+        # افزایش بازدید
+        if hasattr(article, 'view_count'):
+            article.view_count += 1
+            article.save()
+        
+        return render(request, 'team6/article_detail.html', {'article': article})
+    except Exception as e:
+        # لاگ کردن خطا برای ادمین (اختیاری)
+        return render(request, 'errors/500.html', status=500)
 
 # API برای محتوای ویکی
 def get_wiki_content(request):
@@ -284,3 +291,15 @@ def summarize_text(text):
 
     # اگر خلاصه‌سازی موفق نبود، متن کامل را برمی‌گردانیم
     return text[:150] + "..." if len(text) > 150 else text
+
+def error_404(request, exception):
+    return render(request, 'team6/errors/404.html', status=404)
+
+def error_500(request):
+    return render(request, 'team6/errors/500.html', status=500)
+
+def error_403(request, exception):
+    return render(request, 'team6/errors/403.html', status=403)
+
+def error_400(request, exception):
+    return render(request, 'team6/errors/400.html', status=400)

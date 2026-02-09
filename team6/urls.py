@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from . import views
-
+from .views import error_404, error_500, error_403, error_400 # ایمپورت ویوهای خطا
 app_name = "team6"
 
 urlpatterns = [
@@ -28,3 +28,9 @@ urlpatterns = [
     # API خارجی برای محتوا
     path("api/wiki/content", views.get_wiki_content, name="external_api"),
 ]
+
+
+handler404 = 'team6.views.error_404'
+handler500 = 'team6.views.error_500'
+handler403 = 'team6.views.error_403'
+handler400 = 'team6.views.error_400'
