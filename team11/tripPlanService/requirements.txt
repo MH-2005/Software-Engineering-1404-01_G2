@@ -1,0 +1,4 @@
+django~=5.2.11
+grpcio
+grpcio-tools
+requests
