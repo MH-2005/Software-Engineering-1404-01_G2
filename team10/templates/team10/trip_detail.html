@@ -1,0 +1,34 @@
+{% extends "team10/base.html" %}
+{% block title %}جزئیات سفر{% endblock %}
+
+{% block content %}
+  <section class="card card--wide">
+    <div class="card__head">
+      <h2>جزئیات سفر</h2>
+      <div class="badge">Details</div>
+    </div>
+
+    {% if trip %}
+      <div class="muted">این صفحه فعلاً اسکلت است؛ بعداً برنامه روزبه‌روز و آیتم‌ها را اینجا می‌ریزیم.</div>
+      <div style="margin-top:12px">
+        <div><b>مقصد:</b> {{ trip.destination_name }}</div>
+        <div><b>مبدأ:</b> {{ trip.origin_name|default:"—" }}</div>
+        <div><b>مدت:</b> {{ trip.days }} روز</div>
+        <div><b>تاریخ شروع:</b> {{ trip.start_at|default:"—" }}</div>
+        <div><b>بودجه:</b> {{ trip.budget|default:"—" }}</div>
+        <div><b>وضعیت:</b> {{ trip.get_status_display }}</div>
+        <div><b>سبک‌ها:</b> {{ trip.styles }}</div>
+      </div>
+
+      <div class="actions" style="margin-top:14px">
+        <a class="btn" href="/team10/trips/{{ trip.id }}/cost/">تحلیل هزینه</a>
+        <a class="btn" href="/team10/trips/{{ trip.id }}/styles/">سبک‌ها</a>
+        <a class="btn btn--ghost" href="/team10/trips/{{ trip.id }}/replan/">بازتولید</a>
+      </div>
+    {% else %}
+      <div class="alert alert--error">
+        دیتابیس آماده نیست یا سفر پیدا نشد. (trip_id={{ trip_id }})
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

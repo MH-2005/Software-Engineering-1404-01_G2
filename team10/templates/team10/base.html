@@ -1,0 +1,39 @@
+{% load static %}
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Trip Plan | Team 10{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'team10/styles/style.css' %}">
+</head>
+<body>
+  <div class="bg-pattern"></div>
+
+  <header class="topbar">
+    <div class="container topbar__row">
+      <div class="nav">
+        <a href="/" class="nav__link">خانه سامانه</a>
+        <a href="/team10/" class="nav__link">خانه تیم ۱۰</a>
+        <a href="/team10/trips/" class="nav__link">سفرهای من</a>
+      </div>
+
+      <div class="brand__text">
+        <div class="brand__title">برنامه‌ریز سفر</div>
+        <div class="brand__sub">تیم ۱۰</div>
+            </div>
+            <div class="brand__logo">سفر</div>
+
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container muted small">Trip Plan · Team 10</div>
+  </footer>
+</body>
+</html>

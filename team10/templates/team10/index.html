@@ -1,24 +1,101 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group 9 - Map Service</title>
-    <link rel="stylesheet" href="{% static 'team10/styles/style.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
-</head>
-<body>
-    <h1>Map Service</h1>
-    <h3>پیاده‌سازی توسط گروه 9</h3>
-    <hr style="width: 50%; margin: 20px auto; opacity: 0.3;">
-    
-    <div style="border: 2px dashed #ccc; padding: 50px; border-radius: 10px; margin: 20px 0;">
-        <p>محل قرارگیری رابط کاربری میکرو سرویس</p>
-        <p>(Microservice UI Placeholder)</p>
+{% extends "team10/base.html" %}
+{% block title %}داشبورد | تورها{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div>
+      <h1>داشبورد تورهای پیشنهادی</h1>
+      <p class="muted">
+        تورهای آماده را ببینید یا یک سفر جدید بسازید.
+      </p>
     </div>
 
-    <a href="/" class="back-btn"> بازگشت به داشبورد اصلی</a>
-    
-</body>
-</html>
+    <div class="hero__stats">
+      <div class="stat">
+        <div class="stat__num">{{ trips_count }}</div>
+        <div class="stat__label">تعداد سفرهای من</div>
+      </div>
+      <div class="stat">
+        <div class="stat__num">۸</div>
+        <div class="stat__label">سبک‌های سفر</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top: 10px;">
+    <div class="card__head">
+      <h2>شروع سریع</h2>
+      <div class="actions actions--tight">
+        <a class="btn btn--primary" href="/team10/create/">ساخت سفر جدید</a>
+        <a class="btn" href="/team10/trips/">مشاهده سفرهای من</a>
+      </div>
+    </div>
+
+    <div class="tourgrid" style="margin-top: 10px;">
+      {% for tour in tours %}
+        <div class="tour">
+          <div class="tour__title">{{ tour.title }}</div>
+          <div class="muted">{{ tour.subtitle }}</div>
+
+          <div class="tour__tags">
+            {% for tag in tour.tags_fa %}
+              <span class="tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+
+          <div class="actions actions--tight" style="margin-top: 12px;">
+            <a class="btn btn--sm" href="/team10/create/?preset={{ tour.preset }}">ساخت سفر با این تور</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="card" style="margin-top: 18px;">
+    <div class="card__head">
+      <h2>آخرین سفرهای من</h2>
+      <a class="btn btn--sm" href="/team10/trips/">همه سفرها</a>
+    </div>
+
+    {% if trips %}
+      <div class="table">
+        <div class="table__head">
+          <div>مقصد</div>
+          <div>تاریخ / مدت</div>
+          <div>وضعیت</div>
+          <div>جزئیات</div>
+        </div>
+
+        {% for t in trips %}
+          <div class="table__row">
+            <div class="cell">
+              <div class="title">{{ t.destination_name|default:"—" }}</div>
+              <div class="muted small">مبدأ: {{ t.origin_name|default:"—" }}</div>
+            </div>
+
+            <div class="cell">
+              <div class="title">{{ t.start_at_jalali|default:"—" }} · {{ t.days }} روز</div>
+              <div class="muted small">
+                {% if t.total_cost %}هزینه: {{ t.total_cost }}{% else %}هزینه: نامشخص{% endif %}
+                {% if t.budget %} · بودجه: {{ t.budget }}{% endif %}
+              </div>
+            </div>
+
+            <div class="cell">
+              <span class="pill pill--{{ t.status|default:'draft' }}">{{ t.status_fa|default:"پیش‌نویس" }}</span>
+            </div>
+
+            <div class="cell actions actions--tight">
+              <a class="btn btn--sm" href="{{ t.url_detail }}">مشاهده</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">
+        <div class="empty__title">هنوز سفری ندارید</div>
+        <div class="muted">برای شروع، روی «ساخت سفر جدید» بزنید.</div>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}
