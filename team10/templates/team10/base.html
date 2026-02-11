@@ -2,45 +2,53 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}برنامه‌ریز سفر | تیم ۱۰{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'team10/styles/style.css' %}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    {% block extra_css %}{% endblock %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}برنامه‌ریز سفر | تیم ۱۰{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'team10/styles/style.css' %}">
+
+  <!-- Font: Vazirmatn -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome (برای آیکن لوگو) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-    <div class="bg-pattern"></div>
+  <div class="bg-pattern"></div>
 
-    <header class="main-header">
-        <div class="container header-content">
-            <div class="logo">
-                <i class="fa-solid fa-route"></i>
-                <div class="logo-text">
-                    <h1>برنامه‌ریز سفر</h1>
-                    <span>تیم ۱۰</span>
-                </div>
-            </div>
-
-            <nav class="nav-links">
-                <a href="/" class="nav-link">خانه سامانه</a>
-                <a href="/team10/" class="nav-link">خانه تیم</a>
-                <a href="/team10/trips/" class="nav-link">سفرهای من</a>
-            </nav>
+  <header class="main-header">
+    <div class="container header-content">
+      <div class="logo">
+        <i class="fa-solid fa-route" aria-hidden="true"></i>
+        <div class="logo-text">
+          <h1>برنامه‌ریز سفر</h1>
+          <span>تیم ۱۰</span>
         </div>
-    </header>
+      </div>
 
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
+      <!-- نسخه pill (سه دکمه کرمی) -->
+      <nav class="nav-pills" aria-label="team10 navigation">
+        <a href="/" class="nav-pill">خانه سامانه</a>
+        <a href="/team10/" class="nav-pill">خانه تیم</a>
+        <a href="/team10/trips/" class="nav-pill">سفرهای من</a>
+      </nav>
+    </div>
+  </header>
 
-    <footer class="main-footer">
-        <div class="container">
-            © سامانه برنامه‌ریز سفر — تیم ۱۰
-        </div>
-    </footer>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="main-footer">
+    <div class="container">© سامانه برنامه‌ریز سفر — تیم ۱۰</div>
+  </footer>
+
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

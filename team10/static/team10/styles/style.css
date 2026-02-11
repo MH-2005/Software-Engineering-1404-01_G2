@@ -766,3 +766,30 @@ body {
     opacity: 0.8;
     border-bottom: 2px solid var(--persian-gold);
 }
+
+/* ---- Header nav pills (Team10 header only) */
+.main-header .nav-pills {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.main-header .nav-pills .nav-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border-radius: 999px;          /* بیضی */
+  background: #FFE082;           /* کرمی */
+  color: #3e2723;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: all 0.22s ease;
+}
+
+.main-header .nav-pills .nav-pill:hover {
+  background: #f7ba05;           /* پررنگ‌تر روی hover */
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
