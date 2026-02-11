@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import List
-from django.contrib.auth.models import User
 
 from ...models import Trip as TripModel, TripRequirements as TripRequirementsModel, PreferenceConstraint as PreferenceConstraintModel
 from ...domain.entities.trip import Trip
@@ -14,8 +13,13 @@ from .trip_planning_service import TripPlanningService
 class TripPlanningServiceImpl(TripPlanningService):
     """Concrete implementation of TripPlanningService using Django ORM."""
 
-    def create_initial_trip(self, requirements_data: dict, user: User) -> TripModel:
-        """Create an initial trip based on user requirements."""
+    def create_initial_trip(self, requirements_data: dict, user_id: str) -> TripModel:
+        """Create an initial trip based on user requirements.
+
+        Args:
+            requirements_data: Dictionary containing trip requirements
+            user_id: Hash string ID of the user from central auth system
+        """
 
         # Parse dates
         start_date = datetime.fromisoformat(requirements_data['start_date'])
@@ -23,7 +27,7 @@ class TripPlanningServiceImpl(TripPlanningService):
 
         # Create TripRequirements
         requirements = TripRequirementsModel.objects.create(
-            user=user,
+            user_id=user_id,
             start_at=start_date,
             end_at=end_date,
             destination_name=requirements_data['destination'],
@@ -42,7 +46,7 @@ class TripPlanningServiceImpl(TripPlanningService):
 
         # Create Trip
         trip = TripModel.objects.create(
-            user=user,
+            user_id=user_id,
             requirements=requirements,
             status='DRAFT'
         )
@@ -92,8 +96,13 @@ class TripPlanningServiceImpl(TripPlanningService):
 
         return trip
 
-    def view_trip(self, trip_id: int, user_id: int) -> TripModel:
-        """View trip details."""
+    def view_trip(self, trip_id: int, user_id: str) -> TripModel:
+        """View trip details.
+
+        Args:
+            trip_id: ID of the trip
+            user_id: Hash string ID of the user
+        """
         trip = TripModel.objects.get(id=trip_id, user_id=user_id)
         return trip
 
