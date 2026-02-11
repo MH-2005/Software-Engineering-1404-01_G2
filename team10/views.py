@@ -10,3 +10,6 @@ def ping(request):
 
 def base(request):
     return render(request, f"{TEAM_NAME}/index.html")
+
+def create_trip(request):
+    return render(request, f"{TEAM_NAME}/create-trip.html")
