@@ -1,24 +1,56 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from decimal import Decimal
+from datetime import timedelta
 
 User = get_user_model()
 
 
+def validate_15_minute_intervals(value):
+    if value.minute % 15 != 0:
+        raise ValidationError('زمان باید مضرب 15 دقیقه باشد')
+
+
+class BudgetLevelChoices(models.TextChoices):
+    ECONOMY = 'ECONOMY', 'اقتصادی'
+    MEDIUM = 'MEDIUM', 'معمولی'
+    LUXURY = 'LUXURY', 'لوکس'
+    UNLIMITED = 'UNLIMITED', 'بدون محدودیت'
+
+
+class TravelStyleChoices(models.TextChoices):
+    SOLO = 'SOLO', 'تنها'
+    COUPLE = 'COUPLE', 'دونفره'
+    FAMILY = 'FAMILY', 'خانوادگی'
+    FRIENDS = 'FRIENDS', 'با دوستان'
+    BUSINESS = 'BUSINESS', 'کاری'
+
+
+class ItemTypeChoices(models.TextChoices):
+    VISIT = 'VISIT', 'بازدید'
+    STAY = 'STAY', 'اقامت'
+
+
+class PlaceCategoryChoices(models.TextChoices):
+    HISTORICAL = 'HISTORICAL', 'تاریخی'
+    NATURAL = 'NATURAL', 'طبیعی'
+    CULTURAL = 'CULTURAL', 'فرهنگی'
+    RECREATIONAL = 'RECREATIONAL', 'تفریحی'
+    RELIGIOUS = 'RELIGIOUS', 'مذهبی'
+    DINING = 'DINING', 'رستوران'
+
+
+class PriceTierChoices(models.TextChoices):
+    FREE = 'FREE', 'رایگان'
+    BUDGET = 'BUDGET', 'ارزان'
+    MODERATE = 'MODERATE', 'متوسط'
+    EXPENSIVE = 'EXPENSIVE', 'گران'
+    LUXURY = 'LUXURY', 'لوکس'
+
+
 class Trip(models.Model):
-    BUDGET_CHOICES = [
-        ('ECO', 'Economical'),
-        ('MEDIUM', 'Medium'),
-        ('LUXURY', 'Luxury'),
-    ]
-
-    TRAVEL_STYLE_CHOICES = [
-        ('COUPLE', 'Couple'),
-        ('FAMILY', 'Family'),
-        ('SOLO', 'Solo'),
-    ]
-
     GENERATION_STRATEGY_CHOICES = [
         ('HISTORICAL', 'Historical'),
         ('ECONOMIC', 'Economic'),
@@ -33,7 +65,9 @@ class Trip(models.Model):
     trip_id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='team11_trips',
         db_column='user_id'
     )
@@ -45,16 +79,18 @@ class Trip(models.Model):
         db_column='copied_from_trip_id'
     )
     title = models.CharField(max_length=200)
-    origin_city_id = models.CharField(max_length=50, blank=True)
-    destination_city_id = models.CharField(max_length=50)
+    province = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, null=True, blank=True)
     start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
     duration_days = models.IntegerField(validators=[MinValueValidator(1)])
-    budget_level = models.CharField(max_length=10, choices=BUDGET_CHOICES)
+    budget_level = models.CharField(
+        max_length=15, choices=BudgetLevelChoices.choices)
     daily_available_hours = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(24)]
     )
     travel_style = models.CharField(
-        max_length=10, choices=TRAVEL_STYLE_CHOICES)
+        max_length=15, choices=TravelStyleChoices.choices)
     generation_strategy = models.CharField(
         max_length=15, choices=GENERATION_STRATEGY_CHOICES)
     status = models.CharField(
@@ -68,18 +104,26 @@ class Trip(models.Model):
     reminder_enabled = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if not self.end_date and self.start_date and self.duration_days:
+            self.end_date = self.start_date + \
+                timedelta(days=self.duration_days - 1)
+        super().save(*args, **kwargs)
+
     class Meta:
         db_table = 'sql_trip'
         app_label = 'team11'
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['user', '-created_at']),
-            models.Index(fields=['destination_city_id']),
+            models.Index(fields=['province']),
+            models.Index(fields=['city']),
             models.Index(fields=['status']),
         ]
 
     def __str__(self):
-        return f"{self.title} - {self.destination_city_id}"
+        location = self.city if self.city else self.province
+        return f"{self.title} - {location}"
 
 
 class TripDay(models.Model):
@@ -116,13 +160,6 @@ class TripItem(models.Model):
         ('CAR', 'Personal Car'),
     ]
 
-    COST_CATEGORY_CHOICES = [
-        ('FREE', 'Free'),
-        ('LOW', 'Low Cost'),
-        ('MEDIUM', 'Medium Cost'),
-        ('HIGH', 'High Cost'),
-    ]
-
     item_id = models.BigAutoField(primary_key=True)
     day = models.ForeignKey(
         TripDay,
@@ -130,15 +167,45 @@ class TripItem(models.Model):
         related_name='items',
         db_column='day_id'
     )
+    item_type = models.CharField(
+        max_length=10,
+        choices=ItemTypeChoices.choices,
+        default=ItemTypeChoices.VISIT
+    )
     place_ref_id = models.CharField(max_length=100)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    duration_minutes = models.IntegerField(validators=[MinValueValidator(1)])
+    title = models.CharField(max_length=255)
+    category = models.CharField(
+        max_length=50,
+        choices=PlaceCategoryChoices.choices,
+        blank=True
+    )
+    address_summary = models.CharField(max_length=500, blank=True)
+    lat = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+    lng = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+    wiki_summary = models.TextField(blank=True)
+    wiki_link = models.URLField(blank=True)
+    main_image_url = models.URLField(blank=True)
+    start_time = models.TimeField(validators=[validate_15_minute_intervals])
+    end_time = models.TimeField(validators=[validate_15_minute_intervals])
+    duration_minutes = models.IntegerField(validators=[MinValueValidator(60)])
     sort_order = models.IntegerField(default=0)
     is_locked = models.BooleanField(default=False)
-    cost_category = models.CharField(
-        max_length=10, choices=COST_CATEGORY_CHOICES, default='FREE')
-    cost_amount = models.DecimalField(
+    price_tier = models.CharField(
+        max_length=15,
+        choices=PriceTierChoices.choices,
+        default=PriceTierChoices.FREE
+    )
+    estimated_cost = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=Decimal('0.00'),
@@ -323,6 +390,7 @@ class UserMedia(models.Model):
     MEDIA_TYPE_CHOICES = [
         ('PHOTO', 'Photo'),
         ('VIDEO', 'Video'),
+        ('PANORAMA', 'Panorama'),
     ]
 
     media_id = models.BigAutoField(primary_key=True)
