@@ -156,6 +156,19 @@ Key routes:
 
 ---
 
+## API Overview
+
+| Method | Endpoint | Description |
+|--------|----------|------------|
+| GET | `/team6/` | List articles |
+| GET | `/team6/article/<slug>/` | Retrieve article details |
+| GET | `/team6/article/<slug>/revisions/` | List article revisions |
+| GET | `/team6/notifications/` | Retrieve user notifications |
+| POST | `/team6/api/wiki/content` | Fetch external wiki content |
+| POST | `/team6/api/preview-ai/` | Preview generated content |
+
+---
+
 ## Database
 
 The Wiki Service relies on Django's ORM for data modeling and persistence.
