@@ -8,8 +8,6 @@ ES = Elasticsearch(
 INDEX_NAME = "articles"
 
 def index_article_version(version: Version):
-    # Index a version of an article in Elasticsearch
-
     body = {
         "article_name": version.article.name,
         "version_name": version.name,
@@ -26,7 +24,7 @@ def search_articles_semantic(query, size=10):
         "query": {
             "multi_match": {
                 "query": query,
-                "fields": ["content^2", "summary", "tags"],
+                "fields": ["content", "summary^2", "tags^3"],
                 "fuzziness": "AUTO"
             }
         },
