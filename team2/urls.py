@@ -9,4 +9,5 @@ urlpatterns = [
     path("api/versions/create/", views.create_version_from_version, name="team2-create-version"),
     path("api/versions/<str:version_name>/", views.get_version, name="team2-get-version"),
     path("api/vote/", views.vote, name="team2-vote"),
+    path("api/versions/<str:version_name>/publish/", views.publish_version, name="team2-publish-version"),
 ]

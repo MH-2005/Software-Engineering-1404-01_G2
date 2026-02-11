@@ -12,6 +12,8 @@ from .serializers import (
     ArticleSerializer, VersionSerializer, CreateArticleSerializer,
     CreateVersionFromVersionSerializer, VoteSerializer,
 )
+from .tasks.indexing import tag_article
+from .tasks.tasks import summarize_article
 
 TEAM_NAME = "team2"
 
@@ -55,7 +57,6 @@ def create_article(request):
         content='',
         summary='',
         editor_id=request.user.id,
-        status=Version.Status.DRAFT,
     )
 
     article.current_version = default_version
@@ -147,3 +148,19 @@ def vote(request):
         article.save()
 
     return Response({"article": article.name, "score": article.score, "your_vote": value})
+
+
+@api_view(['POST'])
+@authentication_classes(AUTH_CLASSES)
+@permission_classes(PERM_CLASSES)
+def publish_version(request, version_name):
+    version = get_object_or_404(Version, name=version_name)
+    article = version.article
+
+    article.current_version = version
+    article.save()
+
+    tag_article(article.name)
+    summarize_article(article.name)
+
+    return Response(ArticleSerializer(article).data)
