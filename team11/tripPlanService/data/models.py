@@ -112,7 +112,7 @@ class Trip(models.Model):
 
     class Meta:
         db_table = 'sql_trip'
-        app_label = 'team11'
+        app_label = 'data'
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['user', '-created_at']),
@@ -140,7 +140,7 @@ class TripDay(models.Model):
 
     class Meta:
         db_table = 'sql_trip_day'
-        app_label = 'team11'
+        app_label = 'data'
         ordering = ['trip', 'day_index']
         unique_together = [['trip', 'day_index']]
         indexes = [
@@ -229,7 +229,7 @@ class TripItem(models.Model):
 
     class Meta:
         db_table = 'sql_trip_item'
-        app_label = 'team11'
+        app_label = 'data'
         ordering = ['day', 'sort_order']
         indexes = [
             models.Index(fields=['day', 'sort_order']),
@@ -276,7 +276,7 @@ class ItemDependency(models.Model):
 
     class Meta:
         db_table = 'sql_item_dependency'
-        app_label = 'team11'
+        app_label = 'data'
         unique_together = [['item', 'prerequisite_item']]
         indexes = [
             models.Index(fields=['item']),
@@ -312,7 +312,7 @@ class ShareLink(models.Model):
 
     class Meta:
         db_table = 'sql_share_link'
-        app_label = 'team11'
+        app_label = 'data'
         indexes = [
             models.Index(fields=['token']),
             models.Index(fields=['trip', 'expires_at']),
@@ -339,7 +339,7 @@ class Vote(models.Model):
 
     class Meta:
         db_table = 'sql_vote'
-        app_label = 'team11'
+        app_label = 'data'
         unique_together = [['item', 'guest_session_id']]
         indexes = [
             models.Index(fields=['item', 'guest_session_id']),
@@ -375,7 +375,7 @@ class TripReview(models.Model):
 
     class Meta:
         db_table = 'sql_trip_review'
-        app_label = 'team11'
+        app_label = 'data'
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['trip', '-created_at']),
@@ -414,7 +414,7 @@ class UserMedia(models.Model):
 
     class Meta:
         db_table = 'sql_user_media'
-        app_label = 'team11'
+        app_label = 'data'
         ordering = ['-uploaded_at']
         indexes = [
             models.Index(fields=['trip', '-uploaded_at']),
