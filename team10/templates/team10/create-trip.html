@@ -1,49 +1,16 @@
+{% extends "team10/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ایجاد برنامه سفر | ایران‌نما</title>
-    <link rel="stylesheet" href="{% static 'styles/styles.css' %}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+{% block title %}ایجاد برنامه سفر | ایران‌نما{% endblock %}
+
+{% block extra_css %}
     <!-- تقویم شمسی -->
     <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@latest/dist/css/persian-datepicker.min.css">
-
     <!-- استایل اختصاصی این صفحه -->
     <link rel="stylesheet" href="{% static 'team10/styles/create-trip.css' %}">
-</head>
-<body>
+{% endblock %}
 
-    <div class="bg-pattern"></div>
-
-    <header class="main-header">
-        <div class="container header-content">
-            <div class="logo">
-                <i class="fa-solid fa-leaf"></i>
-                <div class="logo-text">
-                    <h1>ایران‌نما</h1>
-                    <span>سامانه هوشمند گردشگری</span>
-                </div>
-            </div>
-            <div class="auth-buttons">
-                {% if request.user.is_authenticated %}
-                    <form method="post" action="/auth/logout/" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-login">خروج</button>
-                    </form>
-                {% else %}
-                    <a href="/auth/" class="btn btn-login">ورود</a>
-                    <a href="/auth/signup/" class="btn btn-login">ثبت‌نام</a>
-                {% endif %}
-            </div>
-        </div>
-    </header>
-
+{% block content %}
     <section class="hero hero-custom">
         <div class="hero-content">
             <h2>برنامه‌ریزی سفر هوشمند</h2>
@@ -149,10 +116,6 @@
             <button class="auth-btn btn-submit-login" onclick="window.location.reload()">سفر جدید</button>
         </div>
     </main>
-
-    <footer class="main-footer">
-        <p>&copy; ۱۴۰۴ - پروژه مهندسی نرم‌افزار ۱ | دانشگاه صنعتی امیرکبیر</p>
-    </footer>
 
     <!-- اسکریپت‌های مورد نیاز -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -424,6 +387,7 @@
             }
         }
     </script>
+{% endblock %}
 
-</body>
-</html>
+{% block extra_js %}
+{% endblock %}
