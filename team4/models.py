@@ -13,6 +13,16 @@ class RegionType(models.TextChoices):
     VILLAGE = 'village', 'روستا'
 
 
+# PriceTier Enum
+class PriceTier(models.TextChoices):
+    UNKNOWN = 'unknown', 'نامشخص'
+    FREE = 'free', 'رایگان'
+    BUDGET = 'budget', 'اقتصادی'
+    MODERATE = 'moderate', 'متوسط'
+    EXPENSIVE = 'expensive', 'گران'
+    LUXURY = 'luxury', 'لوکس'
+
+
 
 class Province(models.Model):
     province_id = models.AutoField(primary_key=True)
@@ -224,6 +234,13 @@ class Facility(models.Model):
     status = models.BooleanField(default=True, verbose_name="وضعیت فعال")
     is_24_hour = models.BooleanField(default=False, verbose_name="24 ساعته")
     
+    price_tier = models.CharField(
+        max_length=20,
+        choices=PriceTier.choices,
+        default=PriceTier.UNKNOWN,
+        verbose_name="سطح قیمت"
+    )
+    
     amenities = models.ManyToManyField(
         Amenity,
         through='FacilityAmenity',
@@ -287,8 +304,25 @@ class Facility(models.Model):
         return self.images.filter(is_primary=True).first()
 
     def get_min_price(self):
+        """دریافت کمترین قیمت - اگر قیمت دقیق نداشت، بر اساس tier تخمین میزنه"""
         pricing = self.pricing_set.filter(status=True).order_by('price').first()
-        return pricing.price if pricing else None
+        if pricing:
+            return pricing.price
+        
+        # اگر قیمت دقیق نداشت، بر اساس tier یه range برمیگردونه
+        return None
+    
+    def get_price_tier_display_range(self):
+        """بازه تقریبی قیمت بر اساس tier (به تومان)"""
+        tier_ranges = {
+            PriceTier.FREE: (0, 0),
+            PriceTier.BUDGET: (100_000, 500_000),
+            PriceTier.MODERATE: (500_000, 1_500_000),
+            PriceTier.EXPENSIVE: (1_500_000, 3_000_000),
+            PriceTier.LUXURY: (3_000_000, 10_000_000),
+            PriceTier.UNKNOWN: (None, None),
+        }
+        return tier_ranges.get(self.price_tier, (None, None))
 
 
 class FacilityAmenity(models.Model):
