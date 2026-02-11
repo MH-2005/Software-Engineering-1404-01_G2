@@ -6,8 +6,8 @@ const Navbar = () => {
     <header className="main-header">
       <div className="container header-content">
         {/* Right Side: Branding from your HTML */}
-        <Link to="/" className="logo no-underline">
-        <i className="fa-solid fa-leaf text-persian-gold text-3xl"></i>
+        <Link to="http://localhost:8000/" className="logo no-underline">
+          <i className="fa-solid fa-leaf text-persian-gold text-3xl"></i>
           <div className="logo-text">
             <h1 className="text-xl font-extrabold text-white">ایران‌نما</h1>
             <span className="text-xs text-white">سامانه هوشمند گردشگری</span>
@@ -16,8 +16,8 @@ const Navbar = () => {
 
         {/* Group 11 Specific Badge */}
         <div className="hidden md:flex items-center px-4 py-1 rounded-full bg-white/10 border border-white/20">
-            <a href="/team11/"><span className="text-white text-sm font-bold">سرویس برنامه‌ریزی سفر (گروه ۱۱)</span></a>
-          </div>
+          <a href="/team11/"><span className="p-2 text-white text-sm font-bold">سرویس برنامه‌ریزی سفر (گروه ۱۱)</span></a>
+        </div>
 
 
         {/* Left Side: Auth & Team Identity */}

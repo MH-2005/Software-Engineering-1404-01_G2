@@ -22,13 +22,13 @@ const HomePage = () => {
         <div className="text-center space-y-4">
           <h2 className="text-4xl font-black text-forest-green">برنامه‌ریزی هوشمند سفر</h2>
           <p className="text-gray-600 max-w-md mx-auto">
-          تجربه‌ای متمایز در برنامه‌ریزی سفر؛ با تکمیل پرسشنامه‌های تخصصی، مقاصد و خدمات را بر اساس معیارهای دقیق خود شخصی‌سازی نمایید.
+            تجربه‌ای متمایز در برنامه‌ریزی سفر؛ با تکمیل پرسشنامه‌های تخصصی، مقاصد و خدمات را بر اساس معیارهای دقیق خود شخصی‌سازی نمایید.
           </p>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8 w-lg justify-center px-6 -mt-4">
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             className="flex-1 py-4 text-lg shadow-xl hover:scale-105"
             onClick={() => navigate('/create-trip')}
           >
@@ -36,8 +36,8 @@ const HomePage = () => {
             ایجاد برنامه سفر
           </Button>
 
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             className="flex-1 py-4 text-lg shadow-xl hover:scale-105"
             onClick={() => navigate('/suggest-destination')}
           >

@@ -26,7 +26,7 @@ const AuthCard: React.FC<AuthCardProps> = ({ title, children, footerLink }) => {
         </div>
 
         <a href="/" className="inline-block mt-6 text-white/80 hover:text-white hover:underline text-sm">
-           بازگشت به صفحه اصلی <i className="fa-solid fa-arrow-left mr-2"></i>
+          بازگشت به صفحه اصلی <i className="fa-solid fa-arrow-left mr-2"></i>
         </a>
       </div>
     </div>

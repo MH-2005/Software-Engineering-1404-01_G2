@@ -1,10 +1,11 @@
+import SuggestDestinationForm from '../containers/suggest-destination/SuggestDestinationForm';
+
 const SuggestDestination = () => {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[40vh]">
-        <h2 className="text-2xl font-bold text-forest-green">صفحه پیشنهاد مقاصد</h2>
-        <p className="text-gray-500 mt-2">محتوای این بخش به زودی اضافه خواهد شد...</p>
-      </div>
-    );
-  };
-  
-  export default SuggestDestination;
+  return (
+    <div className="min-h-screen pt-10">
+      <SuggestDestinationForm />
+    </div>
+  );
+};
+
+export default SuggestDestination;

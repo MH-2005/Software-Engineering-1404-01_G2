@@ -16,7 +16,7 @@ const GalleryRow = ({ direction, images }: { direction: 'ltr' | 'rtl', images: s
       if (direction === 'ltr') {
         // Move left
         offset -= speed;
-        
+
         // Reset when we've scrolled one full set
         if (offset <= -resetPoint) {
           offset = 0;
@@ -24,17 +24,17 @@ const GalleryRow = ({ direction, images }: { direction: 'ltr' | 'rtl', images: s
       } else {
         // Move right
         offset += speed;
-        
+
         // Reset when we've scrolled one full set
         if (offset >= resetPoint) {
           offset = 0;
         }
       }
-      
+
       if (containerRef.current) {
         containerRef.current.style.transform = `translateX(${initialTranaform + offset}px)`;
       }
-      
+
       animationRef.current = requestAnimationFrame(animate);
     };
 
@@ -54,11 +54,11 @@ const GalleryRow = ({ direction, images }: { direction: 'ltr' | 'rtl', images: s
     <div className="relative w-full overflow-hidden py-6">
       <div ref={containerRef} className="flex gap-4 will-change-transform">
         {displayImages.map((src, index) => (
-          <img 
+          <img
             key={index}
-            src={src} 
+            src={src}
             className="h-[120px] w-auto shrink-0 rounded-sm object-cover shadow-md"
-            alt="travel" 
+            alt="travel"
           />
         ))}
       </div>

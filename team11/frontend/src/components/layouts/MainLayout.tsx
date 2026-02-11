@@ -5,9 +5,9 @@ import Footer from './Footer';
 const MainLayout = () => {
   return (
     <div className="min-h-screen flex flex-col relative">
-      <div className="bg-pattern" /> 
+      <div className="bg-pattern" />
       <Navbar />
-      <main className="grow mx-auto px-4 w-full">
+      <main className="grow mx-auto w-full">
         <Outlet />
       </main>
       <Footer />
