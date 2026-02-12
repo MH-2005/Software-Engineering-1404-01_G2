@@ -442,6 +442,12 @@
     gap: 8px;
 }
 
+.t10-cost-breakdown .t10-cost-total {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+
 .t10-cost-top-grid {
     display: grid;
     grid-template-columns: 1.35fr 1fr;

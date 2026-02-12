@@ -10,7 +10,7 @@
 
   {% if trip %}
   <div class="t10-cost-top-grid">
-  <section class="t10-card">
+  <section class="t10-card t10-cost-breakdown">
     <h3>دسته‌بندی هزینه‌ها</h3>
     <div class="t10-cost-list">
       {% for item in cost_breakdown %}
@@ -26,6 +26,25 @@
         <span>هزینه‌ای ثبت نشده است.</span>
       </div>
       {% endfor %}
+    </div>
+
+    <div class="t10-cost-total t10-cost-summary">
+      <div><strong>جمع هزینه:</strong> {{ total_cost|floatformat:0 }} تومان</div>
+      <div><strong>سطح بودجه:</strong>
+        {% with b=trip.requirements.get_budget_level_display|default:"" %}
+          {% with b_lower=b|lower %}
+            {% if b_lower == "economy" or b_lower == "economic" or b_lower == "economical" %}
+              اقتصادی
+            {% elif b_lower == "medium" or b_lower == "normal" or b_lower == "standard" or b_lower == "moderate" %}
+              متوسط
+            {% elif b_lower == "luxury" or b_lower == "lux" %}
+              لوکس
+            {% else %}
+              —
+            {% endif %}
+          {% endwith %}
+        {% endwith %}
+      </div>
     </div>
   </section>
 
@@ -91,25 +110,6 @@
   </section>
   {% endif %}
   </div>
-
-  <section class="t10-card t10-cost-summary">
-    <div><strong>جمع هزینه:</strong> {{ total_cost|floatformat:0 }} تومان</div>
-    <div><strong>سطح بودجه:</strong>
-      {% with b=trip.requirements.get_budget_level_display|default:"" %}
-        {% with b_lower=b|lower %}
-          {% if b_lower == "economy" or b_lower == "economic" or b_lower == "economical" %}
-            اقتصادی
-          {% elif b_lower == "medium" or b_lower == "normal" or b_lower == "standard" or b_lower == "moderate" %}
-            متوسط
-          {% elif b_lower == "luxury" or b_lower == "lux" %}
-            لوکس
-          {% else %}
-            —
-          {% endif %}
-        {% endwith %}
-      {% endwith %}
-    </div>
-  </section>
 
   <section class="t10-section">
     <h3>جزئیات هزینه</h3>
