@@ -3,6 +3,7 @@ import MainLayout from '@/components/layouts/MainLayout';
 import HomePage from '@/pages/HomePage';
 import SuggestDestination from './pages/SuggestDestination';
 import CreateTrip from './pages/CreateTrip';
+import FinalizeTrip from './pages/FinalizeTrip';
 import ScrollToTop from './components/ScrollToTop';
 
 
@@ -16,6 +17,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="create-trip" element={<CreateTrip />} />
           <Route path="suggest-destination" element={<SuggestDestination />} />
+          <Route path="finalize-trip/:tripId" element={<FinalizeTrip />} />
         </Route>
 
         {/* Catch-all redirect to home */}

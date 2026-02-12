@@ -16,7 +16,8 @@ export const GEOGRAPHIC_REGIONS = [
 export const BUDGET_LEVELS = [
   { value: 'ECONOMY', label: 'اقتصادی' },
   { value: 'MEDIUM', label: 'معمولى' },
-  { value: 'LUXURY', label: 'لوکس' }
+  { value: 'LUXURY', label: 'لوکس' },
+  { value: 'UNLIMITED', label: 'بدون محدودیت' }
 ];
 
 export const TRAVEL_STYLES = [
@@ -43,4 +44,15 @@ export const PROGRAM_DENSITY = [
   { value: 'RELAXED', label: 'کم‌تراکم (آرام)' },
   { value: 'BALANCED', label: 'متوسط (برنامه‌ریزی شده)' },
   { value: 'INTENSIVE', label: 'پرتراکم (فشرده)' }
-];
+]
+
+const createLookup = (arr: { value: string; label: string }[]) =>
+  Object.fromEntries(arr.map(item => [item.value, item.label]));
+
+// Create maps
+export const TRAVEL_SEASONS_MAP = createLookup(TRAVEL_SEASONS);
+export const GEOGRAPHIC_REGIONS_MAP = createLookup(GEOGRAPHIC_REGIONS);
+export const BUDGET_LEVELS_MAP = createLookup(BUDGET_LEVELS);
+export const TRAVEL_STYLES_MAP = createLookup(TRAVEL_STYLES);
+export const INITIAL_INTERESTS_MAP = createLookup(INITIAL_INTERESTS);
+export const PROGRAM_DENSITY_MAP = createLookup(PROGRAM_DENSITY);

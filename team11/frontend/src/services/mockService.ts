@@ -42,3 +42,144 @@ export const getMockDestinations = () => {
     }, 1200);
   });
 };
+
+export const getMockTrip = () => {
+  return new Promise((resolve) => {
+    // Simulating network delay
+    setTimeout(() => {
+      resolve({
+        data: {
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          category: 'تاریخی',
+          title: "سفر به اصفهان",
+          province: "اصفهان",
+          city: "اصفهان",
+          start_date: "2026-03-10",
+          end_date: "2026-03-12",
+          duration_days: 3,
+          style: "FAMILY",
+          budget_level: "MEDIUM",
+          status: "ACTIVE",
+          total_cost: 14500000,
+          days: [
+            {
+              day_number: 1,
+              date: "2026-03-10",
+              items: [
+                {
+                  id: "item-001",
+                  type: "VISIT",
+                  category: 'رستوران',
+                  title: "میدان نقش جهان",
+                  start_time: "01:00",
+                  end_time: "11:00",
+                  summery: "میدان نقش جهان یکی از بزرگترین میادین جهان و شاهکار معماری دوران صفویه است",
+                  cost: 14000000,
+                  address: "اصفهان، میدان امام",
+                  url: "https://example.com/naghsh-jahan"
+                },
+                {
+                  id: "item-002",
+                  type: "VISIT",
+                  category: 'تاریخی',
+                  title: "مسجد شاه",
+                  start_time: "11:30",
+                  end_time: "12:30",
+                  summery: "مسجد شاه با معماری باشکوه و کاشی‌کاری‌های بی‌نظیر از آثار ماندگار دوره صفویه",
+                  cost: 150000,
+                  address: "اصفهان، میدان نقش جهان، ضلع جنوبی",
+                  url: null
+                },
+                {
+                  id: "item-003",
+                  type: "STAY",
+                  category: 'هتل',
+                  title: "هتل عباسی",
+                  start_time: "14:00",
+                  end_time: "22:00",
+                  summery: "هتل تاریخی عباسی با معماری سنتی ایرانی و امکانات مدرن",
+                  cost: 3500000,
+                  address: "اصفهان، خیابان چهارباغ عباسی",
+                  url: "https://example.com/abbasi-hotel"
+                }
+              ]
+            },
+            {
+              day_number: 2,
+              date: "2026-03-11",
+              items: [
+                {
+                  id: "item-004",
+                  type: "VISIT",
+                  category: 'تاریخی',
+                  title: "سی‌وسه‌پل",
+                  start_time: "08:30",
+                  end_time: "10:00",
+                  summery: "پل تاریخی سی‌وسه‌پل بر روی زاینده‌رود، از زیباترین پل‌های تاریخی ایران",
+                  cost: 0,
+                  address: "اصفهان، خیابان چهارباغ عباسی",
+                  url: null
+                },
+                {
+                  id: "item-005",
+                  type: "VISIT",
+                  category: 'تاریخی',
+                  title: "کاخ چهلستون",
+                  start_time: "10:30",
+                  end_time: "12:30",
+                  summery: "کاخ زیبای چهلستون با نقاشی‌های دیواری و باغ ایرانی",
+                  cost: 300000,
+                  address: "اصفهان، خیابان عباس آباد",
+                  url: "https://example.com/chehel-sotoun"
+                },
+                {
+                  id: "item-006",
+                  type: "VISIT",
+                  category: 'تاریخی',
+                  title: "بازار قیصریه",
+                  start_time: "15:00",
+                  end_time: "18:00",
+                  summery: "بازار تاریخی قیصریه، مرکز خرید صنایع دستی و سوغات اصفهان",
+                  cost: 500000,
+                  address: "اصفهان، میدان نقش جهان",
+                  url: null
+                }
+              ]
+            },
+            {
+              day_number: 3,
+              date: "2026-03-12",
+              items: [
+                {
+                  id: "item-007",
+                  type: "VISIT",
+                  category: 'تاریخی',
+                  title: "کلیسای وانک",
+                  start_time: "09:00",
+                  end_time: "11:00",
+                  summery: "کلیسای تاریخی وانک در محله جلفا با نقاشی‌های زیبا و موزه",
+                  cost: 250000,
+                  address: "اصفهان، جلفا، میدان وانک",
+                  url: "https://example.com/vank-cathedral"
+                },
+                {
+                  id: "item-008",
+                  type: "VISIT",
+                  category: 'تاریخی',
+                  title: "پل خواجو",
+                  start_time: "12:00",
+                  end_time: "13:30",
+                  summery: "پل خواجو، شاهکار دیگر معماری صفوی بر روی زاینده‌رود",
+                  cost: 0,
+                  address: "اصفهان، انتهای خیابان خواجو",
+                  url: null
+                }
+              ]
+            }
+          ],
+          created_at: "2026-02-12T10:22:31Z"
+        }
+      });
+    }, 100);
+  });
+};
