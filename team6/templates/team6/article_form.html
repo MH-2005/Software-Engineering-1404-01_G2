@@ -63,10 +63,10 @@
 
             <div class="mb-3">
                 <label class="form-label fw-bold">
-                    تگ‌ها 
+                    تگ‌ها <span class="text-danger">*</span>
                 </label>
                 <input type="text" name="tags" class="form-control"
-                    placeholder="مثلاً: تاریخ, معماری, ایران (با کاما جدا کنید)">
+                    placeholder="مثلاً: تاریخ, معماری, ایران (با کاما جدا کنید)" required>
                 <small class="text-muted">تگ‌ها را با , از هم جدا کنید</small>
             </div>
 
@@ -159,6 +159,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         linkModal.hide();
     });
+    const articleSearch = document.getElementById('articleSearch');
+
+articleSearch.addEventListener('input', function() {
+    const searchValue = this.value.toLowerCase();
+    const options = articleSelect.options;
+
+    for (let i = 0; i < options.length; i++) {
+        const text = options[i].text.toLowerCase();
+        if (text.includes(searchValue)) {
+            options[i].style.display = '';
+        } else {
+            options[i].style.display = 'none';
+        }
+    }
+});
 });
 </script>
-{% endblock %}
+{% endblock %}  

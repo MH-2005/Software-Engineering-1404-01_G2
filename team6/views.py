@@ -257,44 +257,44 @@ class ArticleCreateView(CreateView):
             article.body_en = article.body_fa
 
         # تولید خلاصه و تگ با AI
-    if not article.summary or not article.summary.strip():
-        try:
-            llm = FreeAIService()
-            
-            # 1️⃣ خلاصه انگلیسی
-            summary_en = llm.generate_summary(article.body_en)
-            
-            # 2️⃣ ترجمه خلاصه به فارسی
+        if not article.summary or not article.summary.strip():
             try:
-                article.summary = GoogleTranslator(source='en', target='fa').translate(summary_en)
-            except Exception:
-                article.summary = summary_en  # اگر ترجمه خراب شد، همان انگلیسی ذخیره شود
-            
-            # خلاصه را زودتر ذخیره می‌کنیم تا در صورت خطا در مراحل تگ‌گذاری، نتیجه خلاصه از دست نرود.
-            article.save(update_fields=['summary'])
+                llm = FreeAIService()
+                
+                # 1️⃣ خلاصه انگلیسی
+                summary_en = llm.generate_summary(article.body_en)
+                
+                # 2️⃣ ترجمه خلاصه به فارسی
+                try:
+                    article.summary = GoogleTranslator(source='en', target='fa').translate(summary_en)
+                except Exception:
+                    article.summary = summary_en  # اگر ترجمه خراب شد، همان انگلیسی ذخیره شود
+                
+                # خلاصه را زودتر ذخیره می‌کنیم تا در صورت خطا در مراحل تگ‌گذاری، نتیجه خلاصه از دست نرود.
+                article.save(update_fields=['summary'])
 
-            # تگ‌های کاربر
-            user_tags_input = self.request.POST.get('tags', '')
-            user_tags = [t.strip() for t in user_tags_input.split(",") if t.strip()]
+                # تگ‌های کاربر
+                user_tags_input = self.request.POST.get('tags', '')
+                user_tags = [t.strip() for t in user_tags_input.split(",") if t.strip()]
 
-            # تگ‌های AI
-            ai_tags = llm.extract_tags(article.body_fa, article.title_fa)
+                # تگ‌های AI
+                ai_tags = llm.extract_tags(article.body_fa, article.title_fa)
 
-            # ترکیب بدون تکرار
-            all_tags = set(user_tags + ai_tags)
+                # ترکیب بدون تکرار
+                all_tags = set(user_tags + ai_tags)
 
-            for tag_name in all_tags:
-                tag_qs = WikiTag.objects.filter(title_fa=tag_name)
-                if tag_qs.exists():
-                    tag = tag_qs.first()
-                else:
-                    tag = WikiTag.objects.create(title_fa=tag_name)
-                article.tags.add(tag)
+                for tag_name in all_tags:
+                    tag_qs = WikiTag.objects.filter(title_fa=tag_name)
+                    if tag_qs.exists():
+                        tag = tag_qs.first()
+                    else:
+                        tag = WikiTag.objects.create(title_fa=tag_name)
+                    article.tags.add(tag)
 
 
-        except Exception as e:
-            messages.error(self.request, f"خطا در تولید AI: {e}")
-            return self.form_invalid(form)
+            except Exception as e:
+                messages.error(self.request, f"خطا در تولید AI: {e}")
+                return self.form_invalid(form)
 
         article.save()
 

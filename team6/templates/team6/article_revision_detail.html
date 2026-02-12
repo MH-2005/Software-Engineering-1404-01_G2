@@ -2,6 +2,23 @@
 {% block title %}نسخه {{ revision.revision_no }} - {{ article.title_fa }}{% endblock %}
 
 {% block content %}
+<style>
+    /* باکس پیش‌نمایش */
+    #revisionPreview {
+        background-color: #f9f9f9;
+        border: 1px dashed #ccc;
+        border-right: 4px solid #0d6efd;
+        line-height: 1.8;
+    }
+
+    /* لینک‌های داخلی */
+    #revisionPreview a.internal-link {
+        color: #0066cc !important;
+        text-decoration: underline !important;
+        font-weight: bold;
+    }
+</style>
+
 <h2>
     {{ article.title_fa }}
     <small class="text-muted">نسخه {{ revision.revision_no }}</small>
@@ -22,8 +39,8 @@
 </div>
 {% endif %}
 
-<div class="card p-4" style="border-right: 4px solid #0d6efd;">
-    {{ revision.body_fa|linebreaks }}
+<div id="revisionPreview" class="card p-4">
+    {{ revision.body_fa|safe }}
 </div>
 
 <div class="mt-4">

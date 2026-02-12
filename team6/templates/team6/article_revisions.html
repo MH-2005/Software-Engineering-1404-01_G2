@@ -12,7 +12,7 @@
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
                 <strong>نسخه {{ rev.revision_no }}</strong> — 
-                <small class="text-muted">{{ rev.created_at|date:"Y-m-d H:i" }}</small>
+                <small class="text-muted">{{ rev.created_at|date:"Y-m-d H:i" }} - ویرایشگر: {{ rev.editor_user_id }}</small>
                 <p class="mb-0"><i>{{ rev.change_note }}</i></p>
             </div>
             <div>
