@@ -310,6 +310,61 @@ class TripViewSet(viewsets.ViewSet):
 
         return Response(breakdown)
 
+    @action(detail=True, methods=['post'], url_path='days')
+    def create_day(self, request, pk=None):
+        """
+        POST /api/trips/{id}/days/ - Create a new day for a trip
+
+        Used by Trip Generation Service (Mohammad Hossein) to add days
+        to a generated trip.
+
+        Request body: {
+            "day_index": 1,
+            "specific_date": "2026-03-10",
+            "start_geo_location": "اصفهان" (optional)
+        }
+
+        Returns: {
+            "day_id": 123,
+            "trip": 456,
+            "day_index": 1,
+            "specific_date": "2026-03-10",
+            "start_geo_location": "اصفهان",
+            "items": []
+        }
+        """
+        # Verify trip exists
+        trip = TripService.get_trip_detail(int(pk))
+        if not trip:
+            return Response(
+                {"error": "Trip not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Validate input
+        serializer = TripDaySerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Create day
+            day = TripDayService.create_day(
+                int(pk),
+                serializer.validated_data
+            )
+            return Response(
+                TripDaySerializer(day).data,
+                status=status.HTTP_201_CREATED
+            )
+        except ValueError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
 
 class TripDayViewSet(viewsets.ViewSet):
     """API endpoints for TripDay management"""
@@ -380,6 +435,108 @@ class TripDayViewSet(viewsets.ViewSet):
         return Response(
             {"error": "Day not found"},
             status=status.HTTP_404_NOT_FOUND
+        )
+
+    @action(detail=True, methods=['post'], url_path='items/bulk')
+    def create_items_bulk(self, request, pk=None):
+        """
+        POST /api/trip-days/{id}/items/bulk/ - Bulk create items for a day
+
+        Used by Trip Generation Service (Mohammad Hossein) to add multiple
+        items to a day in a single request.
+
+        Request body: {
+            "items": [
+                {
+                    "item_type": "VISIT",
+                    "place_ref_id": "place_123",
+                    "title": "میدان نقش جهان",
+                    "category": "HISTORICAL",
+                    "address_summary": "اصفهان، میدان نقش جهان",
+                    "lat": 32.6546,
+                    "lng": 51.6777,
+                    "start_time": "09:00:00",
+                    "end_time": "11:00:00",
+                    "duration_minutes": 120,
+                    "estimated_cost": "200000.00",
+                    "sort_order": 1
+                },
+                // ... more items
+            ]
+        }
+
+        Returns: {
+            "created_count": 3,
+            "items": [ /* array of created items */ ]
+        }
+        """
+        # Verify day exists
+        day = TripDayService.get_days_for_trip(pk)
+        if not day:
+            return Response(
+                {"error": "Day not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Get items array from request
+        items_data = request.data.get('items', [])
+
+        if not items_data:
+            return Response(
+                {"error": "items array required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not isinstance(items_data, list):
+            return Response(
+                {"error": "items must be an array"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create items
+        created_items = []
+        errors = []
+
+        for idx, item_data in enumerate(items_data):
+            # Validate each item
+            serializer = TripItemSerializer(data=item_data)
+            
+            if not serializer.is_valid():
+                errors.append({
+                    "index": idx,
+                    "errors": serializer.errors
+                })
+                continue
+
+            try:
+                # Create item
+                item = TripItemService.create_item(
+                    int(pk),
+                    serializer.validated_data
+                )
+                created_items.append(item)
+            except ValueError as e:
+                errors.append({
+                    "index": idx,
+                    "error": str(e)
+                })
+
+        # Return response
+        response_data = {
+            "created_count": len(created_items),
+            "items": TripItemSerializer(created_items, many=True).data
+        }
+
+        if errors:
+            response_data["errors"] = errors
+            return Response(
+                response_data,
+                status=status.HTTP_207_MULTI_STATUS
+            )
+
+        return Response(
+            response_data,
+            status=status.HTTP_201_CREATED
         )
 
 
