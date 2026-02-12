@@ -22,22 +22,23 @@ class MockFacilitiesClient(FacilitiesServicePort):
     This service provides the facility details (coordinates, hours, etc.) for those places.
     """
 
+    # Primary names are Persian; used for database (destination_name) and display
     MOCK_REGIONS = [
-        Region(id="1", name="Tehran"),
-        Region(id="2", name="Isfahan"),
-        Region(id="3", name="Shiraz"),
-        Region(id="4", name="Mashhad"),
-        Region(id="5", name="Tabriz"),
-        Region(id="6", name="Yazd"),
-        Region(id="7", name="Kerman"),
-        Region(id="8", name="Rasht"),
-        Region(id="9", name="Kish"),
-        Region(id="10", name="Qeshm"),
-        Region(id="11", name="Ahvaz"),
-        Region(id="12", name="Bandar Abbas"),
-        Region(id="13", name="Hamadan"),
-        Region(id="14", name="Qom"),
-        Region(id="15", name="Kashan"),
+        Region(id="1", name="تهران"),
+        Region(id="2", name="اصفهان"),
+        Region(id="3", name="شیراز"),
+        Region(id="4", name="مشهد"),
+        Region(id="5", name="تبریز"),
+        Region(id="6", name="یزد"),
+        Region(id="7", name="کرمان"),
+        Region(id="8", name="رشت"),
+        Region(id="9", name="کیش"),
+        Region(id="10", name="قشم"),
+        Region(id="11", name="اهواز"),
+        Region(id="12", name="بندرعباس"),
+        Region(id="13", name="همدان"),
+        Region(id="14", name="قم"),
+        Region(id="15", name="کاشان"),
     ]
 
     # Mapping of Persian names and alternative spellings to region IDs
