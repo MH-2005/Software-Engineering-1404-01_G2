@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}برنامه‌ریز سفر | تیم ۱۰{% endblock %}</title>
+  <title>{% block title %}ایران‌نما{% endblock %}</title>
 
   <link rel="stylesheet" href="{% static 'team10/styles/style.css' %}">
   <link rel="stylesheet" href="{% static 'team10/styles/components.css' %}">
@@ -33,8 +33,10 @@
       </div>
 
       <nav class="nav-pills" aria-label="team10 navigation">
+        <a href="/team10/" class="nav-pill nav-pill--icon" aria-label="خانه تیم" title="خانه تیم">
+          <i class="fa-solid fa-house" aria-hidden="true"></i>
+        </a>
         <a href="/" class="nav-pill">خانه سامانه</a>
-        <a href="/team10/" class="nav-pill">خانه تیم</a>
         <a href="/team10/trips/" class="nav-pill">سفرهای من</a>
       </nav>
     </div>
@@ -45,7 +47,7 @@
   </main>
 
   <footer class="main-footer">
-    <div class="container">© سامانه برنامه ريز سفر - تيم ١٠</div>
+    <div class="container">© سامانه برنامه ريز سفر - تيم ١٠ | ایران‌نما</div>
   </footer>
 
   {% block extra_js %}{% endblock %}
