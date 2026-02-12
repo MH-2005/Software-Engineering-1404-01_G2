@@ -19,12 +19,16 @@ const SuggestDestinationForm = () => {
     const navigate = useNavigate();
     const resultsRef = useRef<HTMLDivElement>(null);
 
-    const [formData, setFormData] = useState({
-        season: '',
-        style: '',
-        region: '',
+    const [formData, setFormData] = useState<{
+        season: string | null;
+        style: string | null;
+        region: string | null;
+    }>({
+        season: null,
+        style: null,
+        region: null,
     });
-
+    
     const [availableInterests, setAvailableInterests] = useState(INITIAL_INTERESTS);
     const [selectedInterestValues, setSelectedInterestValues] = useState<string[]>([]);
     const [isAdding, setIsAdding] = useState(false);
@@ -34,7 +38,7 @@ const SuggestDestinationForm = () => {
     const { isLoading, request, data: destinationsData } = useApi(getMockDestinations, { resetDataOnLoading: true });
 
     // Valid if at least one selection is made or an interest is chosen
-    const isFormValid = Object.values(formData).some(val => val !== '') || selectedInterestValues.length > 0;
+    const isFormValid = Object.values(formData).some(val => val !== null) || selectedInterestValues.length > 0;
 
     // Mapping API results to Province Details (Image and Persian Name)
     const destinations = destinationsData?.suggestions.map((item: { province: string }) => {
@@ -50,16 +54,17 @@ const SuggestDestinationForm = () => {
 
     // Auto-scroll when destinations arrive
     useEffect(() => {
-        if (destinations && resultsRef.current) {
+        if (destinationsData && resultsRef.current) {
             resultsRef.current.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
             });
         }
-    }, [destinations]);
+    }, [destinationsData]);
 
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const value = e.target.value === '' ? null : e.target.value;
+        setFormData({ ...formData, [e.target.name]: value });
     };
 
     const toggleInterest = (value: string) => {
@@ -115,9 +120,9 @@ const SuggestDestinationForm = () => {
 
             {/* Select Grid - 5 items now (added Density) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                <Select label="فصل سفر" name="season" value={formData.season} options={TRAVEL_SEASONS} onChange={handleSelectChange} />
-                <Select label="سبک سفر" name="style" value={formData.style} options={TRAVEL_STYLES} onChange={handleSelectChange} />
-                <Select label="منطقه جغرافیایی" name="region" value={formData.region} options={GEOGRAPHIC_REGIONS} onChange={handleSelectChange} />
+                <Select label="فصل سفر" name="season" value={formData.season ?? ''} options={TRAVEL_SEASONS} onChange={handleSelectChange} />
+                <Select label="سبک سفر" name="style" value={formData.style ?? ''} options={TRAVEL_STYLES} onChange={handleSelectChange} />
+                <Select label="منطقه جغرافیایی" name="region" value={formData.region ?? ''} options={GEOGRAPHIC_REGIONS} onChange={handleSelectChange} />
             </div>
 
             {/* Interests Section */}

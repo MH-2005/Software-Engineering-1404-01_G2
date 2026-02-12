@@ -2,9 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from '@/components/layouts/MainLayout';
 import HomePage from '@/pages/HomePage';
 import SuggestDestination from './pages/SuggestDestination';
+import CreateTrip from './pages/CreateTrip';
 
-// Placeholder components for the new pages
-const CreateTrip = () => <div className="text-right"><h2>صفحه ایجاد برنامه سفر</h2></div>;
 
 function App() {
   return (

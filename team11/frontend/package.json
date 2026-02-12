@@ -12,8 +12,9 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.5",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "jalaali-react-date-picker": "^1.0.19",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-router": "^7.13.0",
     "react-router-dom": "^7.13.0"
   },
