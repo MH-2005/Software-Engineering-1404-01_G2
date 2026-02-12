@@ -337,26 +337,62 @@ class TripPlanningServiceImpl(TripPlanningService):
                 current_facility = dinner_restaurant
             else:
                 # Fallback: eat at hotel
-                DailyPlan.objects.create(
-                    trip=trip,
-                    facility_id=hotel.id,
-                    start_at=current_date.replace(hour=19, minute=0),
-                    end_at=current_date.replace(hour=20, minute=30),
-                    activity_type='FOOD',
-                    description=f"شام در {hotel.name}",
-                    place_source_type='FACILITIES',
-                    cost=700000  # Estimate for hotel dinner
-                )
+                dinner_start = current_date.replace(hour=19, minute=0)
+                
+                # If not at hotel, add transfer to hotel for dinner
+                if current_facility.id != hotel.id:
+                    travel_info = self._facilities_service.get_travel_info(
+                        current_facility.id, hotel.id
+                    )
+                    
+                    hotel_dinner_plan = DailyPlan.objects.create(
+                        trip=trip,
+                        facility_id=hotel.id,
+                        start_at=dinner_start,
+                        end_at=current_date.replace(hour=20, minute=30),
+                        activity_type='FOOD',
+                        description=f"شام در {hotel.name}",
+                        place_source_type='FACILITIES',
+                        cost=700000  # Estimate for hotel dinner
+                    )
+                    
+                    # Save transfer info
+                    if travel_info:
+                        TransferPlan.objects.create(
+                            trip=trip,
+                            to_daily_plan=hotel_dinner_plan,
+                            from_facility_id=current_facility.id,
+                            to_facility_id=hotel.id,
+                            distance_km=travel_info.distance_km,
+                            duration_minutes=travel_info.duration_minutes,
+                            transport_mode=travel_info.transport_mode.value,
+                            cost=travel_info.estimated_cost,
+                            transfer_time=dinner_start
+                        )
+                else:
+                    DailyPlan.objects.create(
+                        trip=trip,
+                        facility_id=hotel.id,
+                        start_at=dinner_start,
+                        end_at=current_date.replace(hour=20, minute=30),
+                        activity_type='FOOD',
+                        description=f"شام در {hotel.name}",
+                        place_source_type='FACILITIES',
+                        cost=700000  # Estimate for hotel dinner
+                    )
+                
                 current_facility = hotel
 
             # Optional evening activity if there's time and attractions left
+            evening_activity = None
             if attraction_index < len(attractions):
                 # Check if there's an evening attraction open until late
+                # But first estimate travel time back to hotel to not exceed 23:00 deadline
                 evening_activity, attraction_index, visited_place_ids = self._plan_activity_slot(
                     trip=trip,
                     current_date=current_date,
                     start_hour=21,
-                    end_hour=23,
+                    end_hour=22,  # End at 22:00 to leave time for return to hotel
                     attractions=attractions,
                     attraction_index=attraction_index,
                     visited_place_ids=visited_place_ids,
@@ -367,6 +403,48 @@ class TripPlanningServiceImpl(TripPlanningService):
                 )
                 if evening_activity:
                     current_facility = evening_activity
+
+            # Return to hotel at end of day for sleeping (if not already at hotel)
+            if current_facility.id != hotel.id:
+                travel_info = self._facilities_service.get_travel_info(
+                    current_facility.id, hotel.id
+                )
+                
+                # Determine return time based on last activity
+                if evening_activity:
+                    return_start = current_date.replace(hour=22, minute=0)
+                else:
+                    return_start = current_date.replace(hour=21, minute=0)
+                
+                # Calculate arrival time at hotel
+                travel_duration = travel_info.duration_minutes if travel_info else 15
+                arrival_time = return_start + timedelta(minutes=travel_duration)
+                
+                # Create a DailyPlan entry for sleeping at hotel
+                sleep_plan = DailyPlan.objects.create(
+                    trip=trip,
+                    facility_id=hotel.id,
+                    start_at=arrival_time,
+                    end_at=current_date.replace(hour=23, minute=59),
+                    activity_type='RELAX',
+                    description=f"اقامت شبانه در {hotel.name}",
+                    place_source_type='FACILITIES',
+                    cost=0  # Hotel cost is in HotelSchedule
+                )
+                
+                # Create transfer back to hotel
+                if travel_info:
+                    TransferPlan.objects.create(
+                        trip=trip,
+                        to_daily_plan=sleep_plan,
+                        from_facility_id=current_facility.id,
+                        to_facility_id=hotel.id,
+                        distance_km=travel_info.distance_km,
+                        duration_minutes=travel_info.duration_minutes,
+                        transport_mode=travel_info.transport_mode.value,
+                        cost=travel_info.estimated_cost,
+                        transfer_time=return_start
+                    )
 
             current_date += timedelta(days=1)
 
