@@ -2,6 +2,7 @@ from django.urls import path, re_path
 from . import views
 from .views import error_404, error_500, error_403, error_400 # ایمپورت ویوهای خطا
 app_name = "team6"
+from django.views.decorators.cache import never_cache
 from .views import (
     follow_article, toggle_notification, notifications_list,
     mark_notification_read, archive_notification, mark_all_read,
@@ -10,7 +11,7 @@ from .views import (
 
 urlpatterns = [
     # صفحه اصلی تیم 6 (لیست مقالات)
-    path("", views.ArticleListView.as_view(), name="index"),
+    path("", never_cache(views.ArticleListView.as_view()), name="index"),
     
     # ویو پایه / API پایه
     path("ping/", views.ping, name="ping"),

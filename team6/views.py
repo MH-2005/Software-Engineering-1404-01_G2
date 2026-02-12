@@ -29,6 +29,7 @@ from django.utils.text import slugify
 from .models import ArticleFollow, ArticleNotification
 import numpy as np
 from django.db import transaction
+from django.db.models import F
 
 def sync_internal_links(article):
     """
@@ -105,7 +106,8 @@ class ArticleListView(ListView):
 
         q = self.request.GET.get('q')
         search_type = self.request.GET.get('search_type', 'direct')
-
+        if cat:
+            queryset = queryset.filter(category__slug=cat)
         # ---------- سرچ معنایی ----------
         if q and search_type == 'semantic':
             articles = list(queryset)
@@ -173,9 +175,6 @@ class ArticleListView(ListView):
             )
 
         # return queryset
-            
-        if cat:  # فیلتر دسته‌بندی
-            queryset = queryset.filter(category__slug=cat)
             
         sort_by = self.request.GET.get('sort', 'alphabetical')
         if sort_by == 'views':
@@ -440,10 +439,15 @@ def article_detail(request, slug):
         # افزایش بازدید
         #  چک کردن اینکه آیا این مقاله خاص قبلاً توسط این یوزر دیده شده یا نه
         if slug not in viewed_articles:
-            if hasattr(article, 'view_count'):
-                article.view_count += 1
-                # استفاده از update_fields برای امنیت و سرعت بیشتر دیتابیس
-                article.save(update_fields=['view_count'])
+            # if hasattr(article, 'view_count'):
+                # article.view_count += 1
+                # # استفاده از update_fields برای امنیت و سرعت بیشتر دیتابیس
+                # article.save(update_fields=['view_count'])
+            # افزایش بازدید در دیتابیس
+            WikiArticle.objects.filter(pk=article.pk).update(view_count=F('view_count') + 1)
+            
+            # تازه کردن آبجکت برای نمایش در تمپلت
+            article.refresh_from_db()
         #  اضافه کردن اسلاگ این مقاله به لیست دیده‌شده‌های یوزر
             viewed_articles.append(slug)
             request.session['viewed_articles'] = viewed_articles
