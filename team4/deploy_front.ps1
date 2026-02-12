@@ -23,14 +23,20 @@ if (Test-Path "$PSScriptRoot\static\assets") {
     Remove-Item "$PSScriptRoot\static\assets" -Recurse -Force
 }
 
-# Copy new assets to static folder
+# Create static/assets directory
+New-Item -ItemType Directory -Path "$PSScriptRoot\static\assets" -Force | Out-Null
+
+# Copy assets folder contents
 Write-Host "`n📂 Copying assets to static folder..." -ForegroundColor Yellow
 if (Test-Path "$PSScriptRoot\front\dist\assets") {
-    Copy-Item "$PSScriptRoot\front\dist\assets" -Destination "$PSScriptRoot\static\assets" -Recurse -Force
-    Write-Host "✅ Assets copied to static/assets/" -ForegroundColor Green
-} else {
-    Write-Host "⚠️  No assets folder found in dist" -ForegroundColor Yellow
+    Copy-Item "$PSScriptRoot\front\dist\assets\*" -Destination "$PSScriptRoot\static\assets\" -Recurse -Force
+    Write-Host "✅ Assets subfolder copied" -ForegroundColor Green
 }
+
+# Copy JS and CSS files from dist root
+Copy-Item "$PSScriptRoot\front\dist\*.js" -Destination "$PSScriptRoot\static\assets\" -Force -ErrorAction SilentlyContinue
+Copy-Item "$PSScriptRoot\front\dist\*.css" -Destination "$PSScriptRoot\static\assets\" -Force -ErrorAction SilentlyContinue
+Write-Host "✅ JS/CSS files copied to static/assets/" -ForegroundColor Green
 
 # Copy index.html to templates
 Write-Host "`n📄 Copying index.html to templates..." -ForegroundColor Yellow

@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Star, MapPin, X, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Place } from '../data/mockPlaces';
-import { favoritesService } from '../services/favoritesService';
 
 interface PlaceCardProps {
   place: Place;
   onClose: () => void;
-  onToggleFavorite: (place: Place) => void;
+  onToggleFavorite: (place: Place) => Promise<void>;
   isFavorite: boolean;
 }
 
@@ -32,12 +31,8 @@ export default function PlaceCard({
 
     setIsTogglingFavorite(true);
     try {
-      const response = await favoritesService.toggleFavorite(Number(place.id));
-      
-      if (response.message === 'added' || response.message === 'removed') {
-        // Update parent component state
-        onToggleFavorite(place);
-      }
+      // Call parent handler which will update the state
+      await onToggleFavorite(place);
     } catch (error) {
       console.error('Failed to toggle favorite:', error);
       alert('خطا در ذخیره علاقه‌مندی. لطفا دوباره تلاش کنید.');
