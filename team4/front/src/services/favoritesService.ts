@@ -4,8 +4,8 @@ import { authHelper } from '../utils/authHelper';
 const FAVORITES_URL = `${API_CONFIG.BASE_URL}${API_CONFIG.TEAM_PREFIX}/api/favorites`;
 
 export interface FavoriteToggleResponse {
-  message: 'added' | 'removed';
-  is_favorite: boolean;
+  status: 'added' | 'removed';
+  favorited: boolean;
 }
 
 export interface FavoriteCheckResponse {
@@ -14,15 +14,30 @@ export interface FavoriteCheckResponse {
 }
 
 export interface FavoritePlace {
-  id: string;
-  place_id: string;
-  place_name: string;
-  place_address: string;
-  place_category: string;
-  place_rating: number;
-  place_image?: string;
-  latitude: number;
-  longitude: number;
+  favorite_id: number;
+  user_id: number;
+  facility: number;
+  facility_detail: {
+    fac_id: number;
+    name_fa: string;
+    name_en: string;
+    category: string;
+    city: string;
+    province: string;
+    location: {
+      type: string;
+      coordinates: [number, number];
+    };
+    avg_rating: string;
+    review_count: number;
+    primary_image: string | null;
+    price_from: any;
+    price_tier: string;
+    price_tier_display: string;
+    is_24_hour: boolean;
+    amenities: any[];
+  };
+  created_at: string;
 }
 
 
@@ -34,6 +49,7 @@ export const favoritesService = {
     const response = await fetch(`${FAVORITES_URL}/toggle/`, {
       method: 'POST',
       headers: authHelper.getAuthHeaders(),
+      credentials: 'include',
       body: JSON.stringify({
         facility: facilityId
       })
@@ -52,7 +68,8 @@ export const favoritesService = {
   async checkFavorite(facilityId: number): Promise<boolean> {
     const response = await fetch(`${FAVORITES_URL}/check/?facility=${facilityId}`, {
       method: 'GET',
-      headers: authHelper.getAuthHeaders()
+      headers: authHelper.getAuthHeaders(),
+      credentials: 'include'
     });
 
     if (!response.ok) {
@@ -69,13 +86,16 @@ export const favoritesService = {
   async getFavorites(): Promise<FavoritePlace[]> {
     const response = await fetch(FAVORITES_URL, {
       method: 'GET',
-      headers: authHelper.getAuthHeaders()
+      headers: authHelper.getAuthHeaders(),
+      credentials: 'include'
     });
 
     if (!response.ok) {
       throw new Error('Failed to fetch favorites');
     }
 
-    return response.json();
+    const data = await response.json();
+    // API returns paginated response with results array
+    return data.results || [];
   }
 };

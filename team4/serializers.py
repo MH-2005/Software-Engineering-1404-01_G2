@@ -283,16 +283,18 @@ class RegionSearchResultSerializer(serializers.Serializer):
 class FavoriteSerializer(serializers.ModelSerializer):
     """سریالایزر برای علاقه‌مندی‌ها"""
     facility_detail = FacilityListSerializer(source='facility', read_only=True)
-    user_email = serializers.EmailField(source='user.email', read_only=True)
+    # Don't access user object directly - it's in a different database
+    # Just return user_id as integer
+    user_id = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = Favorite
         fields = [
-            'favorite_id', 'user', 'user_email',
+            'favorite_id', 'user_id',
             'facility', 'facility_detail',
             'created_at'
         ]
-        read_only_fields = ['favorite_id', 'user', 'created_at']
+        read_only_fields = ['favorite_id', 'user_id', 'created_at']
     
     def create(self, validated_data):
         # کاربر از request گرفته می‌شود
@@ -315,25 +317,25 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     """سریالایزر برای نظرات"""
-    user_email = serializers.EmailField(source='user.email', read_only=True)
+    # Don't access user object directly - it's in a different database
+    user_id = serializers.IntegerField(read_only=True)
     user_name = serializers.SerializerMethodField()
     facility_name = serializers.CharField(source='facility.name_fa', read_only=True)
     
     class Meta:
         model = Review
         fields = [
-            'review_id', 'user', 'user_email', 'user_name',
+            'review_id', 'user_id', 'user_name',
             'facility', 'facility_name',
             'rating', 'comment',
             'is_approved', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['review_id', 'user', 'is_approved', 'created_at', 'updated_at']
+        read_only_fields = ['review_id', 'user_id', 'is_approved', 'created_at', 'updated_at']
     
     @extend_schema_field(OpenApiTypes.STR)
     def get_user_name(self, obj):
-        if obj.user.first_name or obj.user.last_name:
-            return f"{obj.user.first_name} {obj.user.last_name}".strip()
-        return obj.user.email.split('@')[0]
+        # Return user_id as string since we can't access user object from different DB
+        return f"User {obj.user_id}"
     
     def validate_rating(self, value):
         if value < 1 or value > 5:

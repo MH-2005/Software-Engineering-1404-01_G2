@@ -14,14 +14,14 @@ import PlaceCard from './components/PlaceCard';
 import RoutingPanel from './components/RoutingPanel';
 import FavoritesPanel from './components/FavoritesPanel';
 import { Place } from './data/mockPlaces';
-import { Route } from './data/mockRoutes';
 import placesService from './services/placesService';
-// import { favoritesService, FavoritePlace } from './services/favoritesService';
-
-const MOCK_USER_ID = 'demo-user-123';
+import { Route } from './data/types';
+import polyline from "@mapbox/polyline";
+import MapCenterListener from './components/MapCenterListener';
+import { favoritesService, FavoritePlace } from './services/favoritesService';
 
 function App() {
-  const [mapCenter, setMapCenter] = useState<[number, number]>([40.7589, -73.9851]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([35.729054, 51.42047]);
   const [allPlaces, setAllPlaces] = useState<Place[]>([]);
   const [filteredPlaces, setFilteredPlaces] = useState<Place[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -33,8 +33,8 @@ function App() {
   const [sourceMarker, setSourceMarker] = useState<[number, number] | null>(null);
   const [destinationMarker, setDestinationMarker] = useState<[number, number] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  // const [favorites, setFavorites] = useState<FavoritePlace[]>([]);
   const [favoritePlaceIds, setFavoritePlaceIds] = useState<Set<string>>(new Set());
+  const [favorites, setFavorites] = useState<FavoritePlace[]>([]);
 
   const cardStyle = 
     "absolute end-4 top-4 w-96 max-w-[90vw] h-[90%] z-10 overflow-auto rounded-lg";
@@ -42,16 +42,36 @@ function App() {
   // Load facilities on mount
   useEffect(() => {
     loadFacilities();
+    loadFavoriteIds();
   }, []);
 
-  // Filter places when category changes
-  useEffect(() => {
-    if (selectedCategory === 'all') {
-      setFilteredPlaces(allPlaces);
-    } else {
-      setFilteredPlaces(allPlaces.filter((place) => place.category === selectedCategory));
+  const loadFavoriteIds = async () => {
+    try {
+      const favorites = await favoritesService.getFavorites();
+      // Extract facility IDs from favorites and add to set
+      const ids = new Set(favorites.map(fav => fav.facility.toString()));
+      setFavoritePlaceIds(ids);
+    } catch (error) {
+      console.error('Failed to load favorites:', error);
+      // Don't show error to user - favorites are optional feature
     }
-  }, [selectedCategory, allPlaces]);
+  };
+
+  // Filter places when category changes (removed - now handled in handleCategoryChange)
+  // useEffect(() => {
+  //   if (selectedCategory === 'all') {
+  //     setFilteredPlaces(allPlaces);
+  //   } else {
+  //     setFilteredPlaces(allPlaces.filter((place) => place.category === selectedCategory));
+  //   }
+  // }, [selectedCategory, allPlaces]);
+
+  // Load favorites when panel opens
+  useEffect(() => {
+    if (showFavorites) {
+      loadFavorites();
+    }
+  }, [showFavorites]);
 
   const loadFacilities = async () => {
     setIsLoading(true);
@@ -71,19 +91,18 @@ function App() {
     }
   };
 
-  // useEffect(() => {
-  //   loadFavorites();
-  // }, []);
-
-  // const loadFavorites = async () => {
-  //   try {
-  //     const userFavorites = await favoritesService.getFavorites(MOCK_USER_ID);
-  //     setFavorites(userFavorites);
-  //     setFavoritePlaceIds(new Set(userFavorites.map((f) => f.place_id)));
-  //   } catch (error) {
-  //     console.error('Failed to load favorites:', error);
-  //   }
-  // };
+  const loadFavorites = async () => {
+    setIsLoading(true);
+    try {
+      const userFavorites = await favoritesService.getFavorites();
+      setFavorites(userFavorites);
+    } catch (error) {
+      console.error('Failed to load favorites:', error);
+      // Don't show alert - user might not be logged in
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCategoryChange = async (category: string) => {
     setSelectedCategory(category);
@@ -105,8 +124,35 @@ function App() {
     }
   };
 
-  const handleLocationSelect = (lat: number, lng: number) => {
+  const handleLocationSelect = (lat: number, lng: number, name?: string) => {
     setMapCenter([lat, lng]);
+    // Could use name for something in the future
+  };
+
+  const handleSearchPlaceSelect = async (facilityId: number) => {
+    // Close other panels to show place card clearly
+    setShowRouting(false);
+    setShowFavorites(false);
+    setShowSidebar(false); // Close sidebar on mobile
+    
+    // Clear route if exists
+    setRoute(null);
+    setSourceMarker(null);
+    setDestinationMarker(null);
+    
+    // Fetch detailed information for the facility by ID
+    setIsLoading(true);
+    try {
+      const detailedPlace = await placesService.getFacilityDetails(facilityId.toString());
+      if (detailedPlace) {
+        setSelectedPlace(detailedPlace);
+        setMapCenter([detailedPlace.latitude, detailedPlace.longitude]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch place details from search:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePlaceSelect = async (place: Place) => {
@@ -130,7 +176,7 @@ function App() {
     source: [number, number],
     destination: [number, number]
   ) => {
-    setRoute(calculatedRoute.coordinates);
+    setRoute(polyline.decode(calculatedRoute.overview_polyline.points));
     setSourceMarker(source);
     setDestinationMarker(destination);
     const midLat = (source[0] + destination[0]) / 2;
@@ -139,37 +185,92 @@ function App() {
   };
 
   const handleToggleFavorite = async (place: Place) => {
-    // try {
-    //   if (favoritePlaceIds.has(place.id)) {
-    //     await favoritesService.removeFavorite(place.id, MOCK_USER_ID);
-    //     setFavoritePlaceIds((prev) => {
-    //       const newSet = new Set(prev);
-    //       newSet.delete(place.id);
-    //       return newSet;
-    //     });
-    //   } else {
-    //     await favoritesService.addFavorite(place, MOCK_USER_ID);
-    //     setFavoritePlaceIds((prev) => new Set([...prev, place.id]));
-    //   }
-    //   await loadFavorites();
-    // } catch (error) {
-    //   console.error('Failed to toggle favorite:', error);
-    // }
-    console.log("add to favorite", place);
+    try {
+      const response = await favoritesService.toggleFavorite(Number(place.id));
+      
+      // Update local state based on server response
+      if (response.favorited) {
+        setFavoritePlaceIds((prev) => new Set([...prev, place.id]));
+      } else {
+        setFavoritePlaceIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(place.id);
+          return newSet;
+        });
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+      throw error; // Re-throw to let PlaceCard handle the error
+    }
   };
 
-  const handleRemoveFavorite = async (placeId: string) => {
-    // try {
-    //   await favoritesService.removeFavorite(placeId, MOCK_USER_ID);
-    //   setFavoritePlaceIds((prev) => {
-    //     const newSet = new Set(prev);
-    //     newSet.delete(placeId);
-    //     return newSet;
-    //   });
-    //   await loadFavorites();
-    // } catch (error) {
-    //   console.error('Failed to remove favorite:', error);
-    // }
+  const handleRemoveFavorite = async (facilityId: number) => {
+    try {
+      await favoritesService.toggleFavorite(facilityId);
+      // Remove from local state
+      setFavoritePlaceIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(facilityId.toString());
+        return newSet;
+      });
+      // Reload favorites list
+      await loadFavorites();
+    } catch (error) {
+      console.error('Failed to remove favorite:', error);
+      alert('خطا در حذف علاقه‌مندی. لطفا دوباره تلاش کنید.');
+    }
+  };
+
+  const handleFavoriteClick = async (favorite: FavoritePlace) => {
+    // Close favorites panel
+    setShowFavorites(false);
+    
+    // Try to fetch full place details
+    setIsLoading(true);
+    try {
+      const placeDetails = await placesService.getFacilityDetails(favorite.facility.toString());
+      if (placeDetails) {
+        setSelectedPlace(placeDetails);
+        setMapCenter([placeDetails.latitude, placeDetails.longitude]);
+      } else {
+        // If can't fetch details, create a minimal Place object from favorite
+        const detail = favorite.facility_detail;
+        const minimalPlace: Place = {
+          id: detail.fac_id.toString(),
+          name: detail.name_fa,
+          category: detail.category,
+          latitude: detail.location.coordinates[1],
+          longitude: detail.location.coordinates[0],
+          rating: parseFloat(detail.avg_rating) || 0,
+          address: `${detail.city}, ${detail.province}`,
+          description: detail.name_fa,
+          images: detail.primary_image ? [detail.primary_image] : [],
+          reviews: [],
+        };
+        setSelectedPlace(minimalPlace);
+        setMapCenter([minimalPlace.latitude, minimalPlace.longitude]);
+      }
+    } catch (error) {
+      console.error('Failed to load place details:', error);
+      // Fallback: use data from favorite
+      const detail = favorite.facility_detail;
+      const minimalPlace: Place = {
+        id: detail.fac_id.toString(),
+        name: detail.name_fa,
+        category: detail.category,
+        latitude: detail.location.coordinates[1],
+        longitude: detail.location.coordinates[0],
+        rating: parseFloat(detail.avg_rating) || 0,
+        address: `${detail.city}, ${detail.province}`,
+        description: detail.name_fa,
+        images: detail.primary_image ? [detail.primary_image] : [],
+        reviews: [],
+      };
+      setSelectedPlace(minimalPlace);
+      setMapCenter([minimalPlace.latitude, minimalPlace.longitude]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCloseRouting = () => {
@@ -178,6 +279,10 @@ function App() {
     setSourceMarker(null);
     setDestinationMarker(null);
   };
+
+  const handleNearbyPlaces = (places: Place[]) => {
+    setAllPlaces(places);
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
@@ -230,7 +335,10 @@ function App() {
           </div>
 
           <div>
-            <SearchBar onLocationSelect={handleLocationSelect} />
+            <SearchBar 
+              onLocationSelect={handleLocationSelect}
+              onPlaceSelect={handleSearchPlaceSelect}
+            />
           </div>
         </div>
       </header>
@@ -305,6 +413,7 @@ function App() {
             route={route}
             sourceMarker={sourceMarker}
             destinationMarker={destinationMarker}
+            onFindNearbyPlaces={handleNearbyPlaces}
           />
 
           {selectedPlace && (
@@ -330,13 +439,18 @@ function App() {
           {showFavorites && (
             <div className={cardStyle}>
               <FavoritesPanel
-                favorites={[]}
+                favorites={favorites}
                 onClose={() => setShowFavorites(false)}
-                onPlaceClick={handleLocationSelect}
+                onPlaceClick={(lat, lng) => {
+                  setMapCenter([lat, lng]);
+                  setShowFavorites(false);
+                }}
                 onRemoveFavorite={handleRemoveFavorite}
+                onFavoriteClick={handleFavoriteClick}
               />
             </div>
           )}
+
         </main>
       </div>
     </div>

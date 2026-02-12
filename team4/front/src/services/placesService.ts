@@ -1,14 +1,15 @@
 import { getApiUrl, API_CONFIG } from '../config/api';
 import { Place, Review } from '../data/mockPlaces';
+import { authHelper } from '../utils/authHelper';
 
 // Backend API response types
 interface BackendFacility {
   fac_id: number;
   name_fa: string;
   name_en: string;
-  category: string;
-  city: string;
-  province: string;
+  category: string | { name_en: string; name_fa: string };
+  city: string | { name_en: string; name_fa: string };
+  province: string | { name_en: string; name_fa: string };
   location: {
     type: 'Point';
     coordinates: [number, number]; // [lng, lat]
@@ -77,10 +78,15 @@ interface FacilityListResponse {
 const transformFacilityToPlace = (facility: BackendFacility, reviews: Review[] = []): Place => {
   const [lng, lat] = facility.location?.coordinates || [0, 0];
   
+  // Handle category - can be string or object
+  const categoryStr = typeof facility.category === 'string' 
+    ? facility.category 
+    : facility.category.name_en;
+  
   return {
     id: facility.fac_id.toString(),
     name: facility.name_en || facility.name_fa,
-    category: facility.category.toLowerCase(),
+    category: categoryStr.toLowerCase(),
     latitude: lat,
     longitude: lng,
     rating: facility.avg_rating || 0,
@@ -162,7 +168,7 @@ class PlacesService {
     is_24_hour?: boolean;
   }): Promise<Place[]> {
     try {
-      const url = getApiUrl(API_CONFIG.ENDPOINTS.FACILITIES);
+      const url = getApiUrl(API_CONFIG.ENDPOINTS.FACILITIES) + "search/";
 
       const response = await fetch(url, {
         method: 'POST',
@@ -262,6 +268,38 @@ class PlacesService {
    */
   async getFacilitiesByCategory(category: string): Promise<Place[]> {
     return this.searchFacilities({ category });
+  }
+
+  /**
+   * Search facilities by name
+   */
+  async searchByName(name: string): Promise<Array<{ name: string; lat: number; lng: number; fac_id: number }>> {
+    try {
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.TEAM_PREFIX}/api/facilities/search/`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: authHelper.getAuthHeaders(),
+        body: JSON.stringify({ name }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: { results: BackendFacility[] } = await response.json();
+      
+      // Transform to search result format
+      return data.results.map(facility => ({
+        name: facility.name_fa,
+        lat: facility.location.coordinates[1], // latitude
+        lng: facility.location.coordinates[0], // longitude
+        fac_id: facility.fac_id
+      }));
+    } catch (error) {
+      console.error('Error searching facilities:', error);
+      return [];
+    }
   }
 }
 
