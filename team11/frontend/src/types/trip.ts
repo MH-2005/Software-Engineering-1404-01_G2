@@ -33,6 +33,7 @@ export interface Trip {
   duration_days: number;
   style: TripStyle;
   budget_level: BudgetLevel;
+  density: string;
   status: TripStatus;
   total_cost: number;
   days: TripDay[];
@@ -53,4 +54,9 @@ export interface CreateTripPayload {
 export interface UpdateTripItemPayload {
   start_time?: string;
   end_time?: string;
+}
+
+export interface TripItemWithDay extends TripItem {
+  day_number: number;
+  date: string;
 }

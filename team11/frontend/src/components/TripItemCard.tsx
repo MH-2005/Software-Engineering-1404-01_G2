@@ -52,7 +52,7 @@ const TripItemCard: React.FC<TripItemCardProps> = ({
       </div>
 
       {/* Card Content */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-48">
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-[260px]">
         <div className="p-4 h-full flex flex-col">
           {/* Type Badge */}
           <div className="flex items-center justify-between mb-2">

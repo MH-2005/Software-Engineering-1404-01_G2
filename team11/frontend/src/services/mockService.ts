@@ -171,6 +171,6 @@ export const getMockTrip = () => {
           created_at: "2026-02-12T10:22:31Z"
         }
       });
-    }, 1000);
+    }, 100);
   });
 };
