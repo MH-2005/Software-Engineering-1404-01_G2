@@ -345,7 +345,91 @@ def trip_detail(request, trip_id: int):
 
 def trip_cost(request, trip_id: int):
     """صفحه محاسبه هزینه سفر"""
-    return render(request, "team10/trip_cost.html", {"trip_id": trip_id})
+    try:
+        qs = _safe_trips_queryset(request)
+        trip = qs.filter(id=trip_id).first()
+        if not trip:
+            raise Http404()
+        
+        # Calculate cost breakdown by category
+        hotel_cost = sum(float(s.cost) for s in trip.hotel_schedules.all())
+        
+        # Group daily plan costs by activity type
+        food_cost = 0
+        transport_cost = 0
+        sightseeing_cost = 0
+        other_cost = 0
+        
+        daily_plans_by_type = {}
+        for plan in trip.daily_plans.all():
+            cost = float(plan.cost)
+            activity_type = plan.activity_type
+            
+            # Track individual items for details
+            if activity_type not in daily_plans_by_type:
+                daily_plans_by_type[activity_type] = []
+            daily_plans_by_type[activity_type].append({
+                'description': plan.description,
+                'cost': cost,
+            })
+            
+            if activity_type == 'FOOD':
+                food_cost += cost
+            elif activity_type == 'TRANSPORT':
+                transport_cost += cost
+            elif activity_type in ('SIGHTSEEING', 'CULTURE'):
+                sightseeing_cost += cost
+            else:
+                other_cost += cost
+        
+        total_cost = hotel_cost + food_cost + transport_cost + sightseeing_cost + other_cost
+        
+        # Calculate percentages
+        def calc_percent(value):
+            return round((value / total_cost * 100) if total_cost > 0 else 0)
+        
+        cost_breakdown = [
+            {'name': 'اقامت', 'cost': hotel_cost, 'percent': calc_percent(hotel_cost), 'type': 'hotel'},
+            {'name': 'حمل‌ونقل', 'cost': transport_cost, 'percent': calc_percent(transport_cost), 'type': 'transport'},
+            {'name': 'خوراک', 'cost': food_cost, 'percent': calc_percent(food_cost), 'type': 'food'},
+            {'name': 'بازدید و فرهنگی', 'cost': sightseeing_cost, 'percent': calc_percent(sightseeing_cost), 'type': 'sightseeing'},
+            {'name': 'تفریحی/سایر', 'cost': other_cost, 'percent': calc_percent(other_cost), 'type': 'other'},
+        ]
+        
+        # Prepare details for expandable sections
+        hotel_details = [
+            {'description': f'هتل (شناسه: {s.hotel_id}) - {s.rooms_count} اتاق', 'cost': float(s.cost)}
+            for s in trip.hotel_schedules.all()
+        ]
+        
+        transport_details = daily_plans_by_type.get('TRANSPORT', [])
+        food_details = daily_plans_by_type.get('FOOD', [])
+        sightseeing_details = daily_plans_by_type.get('SIGHTSEEING', []) + daily_plans_by_type.get('CULTURE', [])
+        other_details = []
+        for t in ['SHOPPING', 'OUTDOOR', 'RELAX', 'NIGHTLIFE', 'OTHER']:
+            other_details.extend(daily_plans_by_type.get(t, []))
+        
+        return render(
+            request,
+            "team10/trip_cost.html",
+            {
+                "trip": trip,
+                "trip_id": trip_id,
+                "total_cost": total_cost,
+                "cost_breakdown": cost_breakdown,
+                "hotel_details": hotel_details,
+                "transport_details": transport_details,
+                "food_details": food_details,
+                "sightseeing_details": sightseeing_details,
+                "other_details": other_details,
+            },
+        )
+    except OperationalError:
+        return render(
+            request,
+            "team10/trip_cost.html",
+            {"trip": None, "trip_id": trip_id, "total_cost": 0, "cost_breakdown": []},
+        )
 
 
 def trip_styles(request, trip_id: int):

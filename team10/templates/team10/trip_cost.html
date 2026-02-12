@@ -1,73 +1,109 @@
-﻿{% extends "team10/base.html" %}
+{% extends "team10/base.html" %}
 {% block title %}هزینه سفر | ایران‌نما{% endblock %}
 
 {% block content %}
 <section class="t10-page">
   <section class="t10-section">
     <h2>هزینه سفر</h2>
-    <p>تحلیل هزینه‌ها بر اساس داده نمایشی.</p>
+    <p>تحلیل هزینه‌های سفر شما به {{ trip.destination_name|default:"مقصد" }}</p>
   </section>
 
+  {% if trip %}
   <section class="t10-card">
     <h3>دسته‌بندی هزینه‌ها</h3>
     <div class="t10-cost-list">
+      {% for item in cost_breakdown %}
+      {% if item.cost > 0 %}
       <div class="t10-cost-row">
-        <span>اقامت</span>
-        <span>۳۵٪</span>
-        <strong>۴٬۲۰۰٬۰۰۰ تومان</strong>
+        <span>{{ item.name }}</span>
+        <span>{{ item.percent }}٪</span>
+        <strong>{{ item.cost|floatformat:0 }} تومان</strong>
       </div>
+      {% endif %}
+      {% empty %}
       <div class="t10-cost-row">
-        <span>حمل‌ونقل</span>
-        <span>۲۰٪</span>
-        <strong>۲٬۴۰۰٬۰۰۰ تومان</strong>
+        <span>هزینه‌ای ثبت نشده است.</span>
       </div>
-      <div class="t10-cost-row">
-        <span>خوراک</span>
-        <span>۱۸٪</span>
-        <strong>۲٬۱۶۰٬۰۰۰ تومان</strong>
-      </div>
-      <div class="t10-cost-row">
-        <span>ورودی‌ها</span>
-        <span>۱۲٪</span>
-        <strong>۱٬۴۴۰٬۰۰۰ تومان</strong>
-      </div>
-      <div class="t10-cost-row">
-        <span>تفریحی/سایر</span>
-        <span>۱۵٪</span>
-        <strong>۱٬۸۰۰٬۰۰۰ تومان</strong>
-      </div>
+      {% endfor %}
     </div>
   </section>
 
   <section class="t10-card t10-cost-summary">
-    <div><strong>جمع هزینه:</strong> ۱۲٬۰۰۰٬۰۰۰ تومان</div>
-    <div><strong>بودجه:</strong> ۱۲٬۵۰۰٬۰۰۰ تومان</div>
-    <div><strong>نتیجه:</strong> <span class="t10-badge t10-badge--active">در محدوده بودجه</span></div>
+    <div><strong>جمع هزینه:</strong> {{ total_cost|floatformat:0 }} تومان</div>
+    <div><strong>سطح بودجه:</strong> {{ trip.requirements.get_budget_level_display }}</div>
   </section>
 
   <section class="t10-section">
     <h3>جزئیات هزینه</h3>
+    
+    {% if hotel_details %}
     <details class="t10-details">
       <summary>اقامت</summary>
       <ul>
-        <li>هتل مرکز شهر - ۳٬۲۰۰٬۰۰۰ تومان</li>
-        <li>مالیات و خدمات - ۱٬۰۰۰٬۰۰۰ تومان</li>
+        {% for item in hotel_details %}
+        <li>{{ item.description }} - {{ item.cost|floatformat:0 }} تومان</li>
+        {% endfor %}
       </ul>
     </details>
+    {% endif %}
+
+    {% if transport_details %}
     <details class="t10-details">
       <summary>حمل‌ونقل</summary>
       <ul>
-        <li>تاکسی درون‌شهری - ۹۰۰٬۰۰۰ تومان</li>
-        <li>رفت‌وبرگشت بین جاذبه‌ها - ۱٬۵۰۰٬۰۰۰ تومان</li>
+        {% for item in transport_details %}
+        <li>{{ item.description|truncatechars:50 }} - {{ item.cost|floatformat:0 }} تومان</li>
+        {% endfor %}
       </ul>
     </details>
+    {% endif %}
+
+    {% if food_details %}
     <details class="t10-details">
-      <summary>ورودی‌ها</summary>
+      <summary>خوراک</summary>
       <ul>
-        <li>بلیط ورودی مجموعه تاریخی - ۹۶۰٬۰۰۰ تومان</li>
-        <li>موزه‌ها - ۴۸۰٬۰۰۰ تومان</li>
+        {% for item in food_details %}
+        <li>{{ item.description|truncatechars:50 }} - {{ item.cost|floatformat:0 }} تومان</li>
+        {% endfor %}
       </ul>
     </details>
+    {% endif %}
+
+    {% if sightseeing_details %}
+    <details class="t10-details">
+      <summary>بازدید و فرهنگی</summary>
+      <ul>
+        {% for item in sightseeing_details %}
+        <li>{{ item.description|truncatechars:50 }} - {{ item.cost|floatformat:0 }} تومان</li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+
+    {% if other_details %}
+    <details class="t10-details">
+      <summary>تفریحی/سایر</summary>
+      <ul>
+        {% for item in other_details %}
+        <li>{{ item.description|truncatechars:50 }} - {{ item.cost|floatformat:0 }} تومان</li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+
+    {% if not hotel_details and not transport_details and not food_details and not sightseeing_details and not other_details %}
+    <p>جزئیات هزینه‌ای برای این سفر ثبت نشده است.</p>
+    {% endif %}
   </section>
+
+  <div class="t10-actions">
+    <a class="t10-btn t10-btn--secondary" href="{% url 'team10:trip_detail' trip_id %}">بازگشت به جزئیات سفر</a>
+  </div>
+
+  {% else %}
+  <section class="t10-card">
+    <p>سفر موردنظر یافت نشد.</p>
+  </section>
+  {% endif %}
 </section>
 {% endblock %}
