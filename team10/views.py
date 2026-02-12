@@ -150,12 +150,26 @@ def home(request):
             except OperationalError:
                 error = "فعلاً دیتابیس آماده نیست (migrate نشده)."
 
-    # ---- GET: نمایش سفرهای اخیر
+    # ---- GET: نمایش سفرهای اخیر و آمار
     try:
         qs = _safe_trips_queryset(request)
         trips_count = qs.count()
+        
+        # Calculate statistics
+        active_trips_count = qs.filter(status__in=['DRAFT', 'IN_PROGRESS']).count()
+        
+        # Calculate average cost
+        total_costs = []
+        all_trips = list(qs)
+        for t in all_trips:
+            cost = t.calculate_total_cost()
+            if cost and cost > 0:
+                total_costs.append(float(cost))
+        
+        average_cost = sum(total_costs) / len(total_costs) if total_costs else 0
+        
+        # Get recent trips for display
         trips_qs = qs[:6]
-
         trips = []
         for t in trips_qs:
             req = t.requirements
@@ -178,6 +192,8 @@ def home(request):
             )
     except OperationalError:
         trips_count = 0
+        active_trips_count = 0
+        average_cost = 0
         trips = []
 
     # ---- Preset tours
@@ -208,6 +224,8 @@ def home(request):
         {
             "trips": trips,
             "trips_count": trips_count,
+            "active_trips_count": active_trips_count,
+            "average_cost": average_cost,
             "styles": STYLES,
             "tours": tours,
             "error": error,

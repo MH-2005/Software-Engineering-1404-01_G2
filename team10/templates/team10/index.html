@@ -1,4 +1,4 @@
-﻿{% extends "team10/base.html" %}
+{% extends "team10/base.html" %}
 {% block title %}داشبورد | ایران‌نما{% endblock %}
 
 {% block content %}
@@ -20,15 +20,15 @@
 <section class="t10-home-summary">
     <article class="t10-mini-card">
         <span class="t10-mini-card__label">تعداد سفرها</span>
-        <strong class="t10-mini-card__value">۱۲</strong>
+        <strong class="t10-mini-card__value">{{ trips_count }}</strong>
     </article>
     <article class="t10-mini-card">
         <span class="t10-mini-card__label">سفر فعال</span>
-        <strong class="t10-mini-card__value">۳</strong>
+        <strong class="t10-mini-card__value">{{ active_trips_count }}</strong>
     </article>
     <article class="t10-mini-card">
         <span class="t10-mini-card__label">میانگین هزینه</span>
-        <strong class="t10-mini-card__value">۹٬۸۰۰٬۰۰۰ تومان</strong>
+        <strong class="t10-mini-card__value">{% if average_cost > 0 %}{{ average_cost|floatformat:0 }} تومان{% else %}—{% endif %}</strong>
     </article>
 </section>
 
