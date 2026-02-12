@@ -6,11 +6,9 @@ import { getMockTrip } from '@/services/mockService';
 import { Trip, TripItemWithDay } from '@/types/trip';
 import Timeline from '@/components/Timeline';
 import Button from '@/components/ui/Button';
-import { BUDGET_LEVELS_MAP, PROGRAM_DENSITY_MAP, TRAVEL_STYLES_MAP } from '@/containers/suggest-destination/constants';
 import TripSummary from '@/containers/finalize-trip/TripSummery';
 
 const FinalizeTrip: React.FC = () => {
-    console.log('ffff')
     const { tripId } = useParams<{ tripId: string }>();
     const navigate = useNavigate();
 

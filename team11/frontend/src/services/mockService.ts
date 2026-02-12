@@ -69,7 +69,7 @@ export const getMockTrip = () => {
                   id: "item-001",
                   type: "VISIT",
                   title: "میدان نقش جهان",
-                  start_time: "09:00",
+                  start_time: "01:00",
                   end_time: "11:00",
                   summery: "میدان نقش جهان یکی از بزرگترین میادین جهان و شاهکار معماری دوران صفویه است",
                   cost: 200000,
