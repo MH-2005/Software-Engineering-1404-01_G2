@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Navigation, MapPin, Clock, ArrowRight, X } from 'lucide-react';
-import { calculateRoute, searchLocation, Route } from '../data/mockRoutes';
+import { Navigation, MapPin, Clock, ArrowRight, X, Building2, MapPinned } from 'lucide-react';
+import { routingService, SearchResult, RouteResponse } from '../services/routingService';
 
 interface RoutingPanelProps {
   onRouteCalculated: (
-    route: Route,
+    route: any,
     source: [number, number],
     destination: [number, number]
   ) => void;
@@ -14,53 +14,116 @@ interface RoutingPanelProps {
 export default function RoutingPanel({ onRouteCalculated, onClose }: RoutingPanelProps) {
   const [sourceQuery, setSourceQuery] = useState('');
   const [destQuery, setDestQuery] = useState('');
-  const [sourceResults, setSourceResults] = useState<any[]>([]);
-  const [destResults, setDestResults] = useState<any[]>([]);
+  const [sourceResults, setSourceResults] = useState<SearchResult[]>([]);
+  const [destResults, setDestResults] = useState<SearchResult[]>([]);
   const [showSourceResults, setShowSourceResults] = useState(false);
   const [showDestResults, setShowDestResults] = useState(false);
-  const [selectedSource, setSelectedSource] = useState<[number, number] | null>(null);
-  const [selectedDest, setSelectedDest] = useState<[number, number] | null>(null);
-  const [currentRoute, setCurrentRoute] = useState<Route | null>(null);
+  const [selectedSource, setSelectedSource] = useState<SearchResult | null>(null);
+  const [selectedDest, setSelectedDest] = useState<SearchResult | null>(null);
+  const [currentRoute, setCurrentRoute] = useState<RouteResponse | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
 
-  const handleSourceSearch = (value: string) => {
+  const handleSourceSearch = async (value: string) => {
     setSourceQuery(value);
-    if (value.length > 0) {
-      const results = searchLocation(value);
-      setSourceResults(results);
-      setShowSourceResults(true);
+    if (value.length > 1) {
+      setIsSearching(true);
+      try {
+        const results = await routingService.searchLocation(value);
+        setSourceResults(results);
+        setShowSourceResults(true);
+      } catch (error) {
+        console.error('Search error:', error);
+        setSourceResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     } else {
       setShowSourceResults(false);
+      setSourceResults([]);
     }
   };
 
-  const handleDestSearch = (value: string) => {
+  const handleDestSearch = async (value: string) => {
     setDestQuery(value);
-    if (value.length > 0) {
-      const results = searchLocation(value);
-      setDestResults(results);
-      setShowDestResults(true);
+    if (value.length > 1) {
+      setIsSearching(true);
+      try {
+        const results = await routingService.searchLocation(value);
+        setDestResults(results);
+        setShowDestResults(true);
+      } catch (error) {
+        console.error('Search error:', error);
+        setDestResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     } else {
       setShowDestResults(false);
+      setDestResults([]);
     }
   };
 
-  const handleSourceSelect = (result: any) => {
+  const handleSourceSelect = (result: SearchResult) => {
     setSourceQuery(result.name);
-    setSelectedSource([result.lat, result.lng]);
+    setSelectedSource(result);
     setShowSourceResults(false);
   };
 
-  const handleDestSelect = (result: any) => {
+  const handleDestSelect = (result: SearchResult) => {
     setDestQuery(result.name);
-    setSelectedDest([result.lat, result.lng]);
+    setSelectedDest(result);
     setShowDestResults(false);
   };
 
-  const handleCalculateRoute = () => {
+  const handleCalculateRoute = async () => {
     if (selectedSource && selectedDest) {
-      const route = calculateRoute(selectedSource, selectedDest);
-      setCurrentRoute(route);
-      onRouteCalculated(route, selectedSource, selectedDest);
+      setIsCalculating(true);
+      try {
+        const route = await routingService.calculateRoute(
+          { lat: selectedSource.lat, lng: selectedSource.lng },
+          { lat: selectedDest.lat, lng: selectedDest.lng }
+        );
+        setCurrentRoute(route);
+        onRouteCalculated(
+          route,
+          [selectedSource.lat, selectedSource.lng],
+          [selectedDest.lat, selectedDest.lng]
+        );
+      } catch (error) {
+        console.error('Route calculation error:', error);
+        alert('خطا در محاسبه مسیر. لطفا دوباره تلاش کنید.');
+      } finally {
+        setIsCalculating(false);
+      }
+    }
+  };
+
+  const getResultIcon = (type: string) => {
+    switch (type) {
+      case 'facility':
+        return <Building2 className="w-4 h-4" />;
+      case 'city':
+      case 'province':
+      case 'village':
+        return <MapPinned className="w-4 h-4" />;
+      default:
+        return <MapPin className="w-4 h-4" />;
+    }
+  };
+
+  const getResultTypeLabel = (type: string) => {
+    switch (type) {
+      case 'facility':
+        return 'مکان';
+      case 'city':
+        return 'شهر';
+      case 'province':
+        return 'استان';
+      case 'village':
+        return 'روستا';
+      default:
+        return '';
     }
   };
 
@@ -69,7 +132,7 @@ export default function RoutingPanel({ onRouteCalculated, onClose }: RoutingPane
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <Navigation className="w-6 h-6 text-blue-600 mr-2" />
-          <h2 className="text-xl font-semibold text-gray-800">Route Planning</h2>
+          <h2 className="text-xl font-semibold text-gray-800">برنامه‌ریزی مسیر</h2>
         </div>
         <button
           onClick={onClose}
@@ -81,26 +144,37 @@ export default function RoutingPanel({ onRouteCalculated, onClose }: RoutingPane
 
       <div className="space-y-4 mb-6">
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Source</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">مبدا</label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#22c55e] w-5 h-5" />
             <input
               type="text"
               value={sourceQuery}
               onChange={(e) => handleSourceSearch(e.target.value)}
-              placeholder="Enter starting point..."
+              placeholder="نقطه شروع را جستجو کنید..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           {showSourceResults && sourceResults.length > 0 && (
-            <div className="absolute top-full mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto z-50">
+            <div className="absolute top-full mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50">
               {sourceResults.map((result, index) => (
                 <button
                   key={index}
                   onClick={() => handleSourceSelect(result)}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-start gap-3"
                 >
-                  <span className="text-sm text-gray-800">{result.name}</span>
+                  <div className="flex-shrink-0 mt-0.5 text-gray-500">
+                    {getResultIcon(result.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-800 truncate">{result.name}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-blue-600">{getResultTypeLabel(result.type)}</span>
+                      {result.address && (
+                        <span className="text-xs text-gray-500 truncate">{result.address}</span>
+                      )}
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -108,26 +182,37 @@ export default function RoutingPanel({ onRouteCalculated, onClose }: RoutingPane
         </div>
 
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Destination</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">مقصد</label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ef4444] w-5 h-5" />
             <input
               type="text"
               value={destQuery}
               onChange={(e) => handleDestSearch(e.target.value)}
-              placeholder="Enter destination..."
+              placeholder="مقصد را جستجو کنید..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           {showDestResults && destResults.length > 0 && (
-            <div className="absolute top-full mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto z-50">
+            <div className="absolute top-full mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50">
               {destResults.map((result, index) => (
                 <button
                   key={index}
                   onClick={() => handleDestSelect(result)}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-start gap-3"
                 >
-                  <span className="text-sm text-gray-800">{result.name}</span>
+                  <div className="flex-shrink-0 mt-0.5 text-gray-500">
+                    {getResultIcon(result.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-800 truncate">{result.name}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-blue-600">{getResultTypeLabel(result.type)}</span>
+                      {result.address && (
+                        <span className="text-xs text-gray-500 truncate">{result.address}</span>
+                      )}
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -136,39 +221,43 @@ export default function RoutingPanel({ onRouteCalculated, onClose }: RoutingPane
 
         <button
           onClick={handleCalculateRoute}
-          disabled={!selectedSource || !selectedDest}
+          disabled={!selectedSource || !selectedDest || isCalculating}
           className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
-          Calculate Route
+          {isCalculating ? 'در حال محاسبه...' : 'محاسبه مسیر'}
         </button>
       </div>
 
-      {currentRoute && (
+      {currentRoute && currentRoute.routes && currentRoute.routes.length > 0 && (
         <div className="border-t pt-6">
           <div className="flex items-center justify-between mb-4 p-4 bg-blue-50 rounded-lg">
             <div className="flex items-center">
               <Navigation className="w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-medium text-gray-800">{currentRoute.distance}</span>
+              <span className="font-medium text-gray-800">
+                {currentRoute.routes[0].legs[0].distance.text}
+              </span>
             </div>
             <div className="flex items-center">
               <Clock className="w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-medium text-gray-800">{currentRoute.duration}</span>
+              <span className="font-medium text-gray-800">
+                {currentRoute.routes[0].legs[0].duration.text}
+              </span>
             </div>
           </div>
 
-          <h3 className="font-semibold text-gray-800 mb-3">Directions</h3>
+          <h3 className="font-semibold text-gray-800 mb-3">مسیریابی</h3>
           <div className="space-y-3">
-            {currentRoute.steps.map((step, index) => (
+            {currentRoute.routes[0].legs[0].steps.map((step, index) => (
               <div key={index} className="flex items-start p-3 bg-gray-50 rounded-lg">
                 <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3">
                   {index + 1}
                 </div>
                 <div className="flex-1">
-                  <p className="text-gray-800 mb-1">{step.instruction}</p>
+                  <p className="text-gray-800 mb-1">{step.instruction || step.name}</p>
                   <div className="flex items-center text-sm text-gray-600">
-                    <span>{step.distance}</span>
+                    <span>{routingService.formatDistance(step.distance)}</span>
                     <ArrowRight className="w-3 h-3 mx-2" />
-                    <span>{step.duration}</span>
+                    <span>{routingService.formatDuration(step.duration)}</span>
                   </div>
                 </div>
               </div>
