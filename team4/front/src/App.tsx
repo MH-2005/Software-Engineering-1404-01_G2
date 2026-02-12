@@ -122,8 +122,35 @@ function App() {
     }
   };
 
-  const handleLocationSelect = (lat: number, lng: number) => {
+  const handleLocationSelect = (lat: number, lng: number, name?: string) => {
     setMapCenter([lat, lng]);
+    // Could use name for something in the future
+  };
+
+  const handleSearchPlaceSelect = async (facilityId: number) => {
+    // Close other panels to show place card clearly
+    setShowRouting(false);
+    setShowFavorites(false);
+    setShowSidebar(false); // Close sidebar on mobile
+    
+    // Clear route if exists
+    setRoute(null);
+    setSourceMarker(null);
+    setDestinationMarker(null);
+    
+    // Fetch detailed information for the facility by ID
+    setIsLoading(true);
+    try {
+      const detailedPlace = await placesService.getFacilityDetails(facilityId.toString());
+      if (detailedPlace) {
+        setSelectedPlace(detailedPlace);
+        setMapCenter([detailedPlace.latitude, detailedPlace.longitude]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch place details from search:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePlaceSelect = async (place: Place) => {
@@ -302,7 +329,10 @@ function App() {
           </div>
 
           <div>
-            <SearchBar onLocationSelect={handleLocationSelect} />
+            <SearchBar 
+              onLocationSelect={handleLocationSelect}
+              onPlaceSelect={handleSearchPlaceSelect}
+            />
           </div>
         </div>
       </header>
