@@ -108,6 +108,71 @@
     @apply bg-glass p-10 rounded-[20px] shadow-2xl w-full max-w-[400px] text-center border border-white/50 backdrop-blur-xl;
   }
 
+  .auth-card h2 {
+    @apply text-forest-green mb-6 text-3xl font-bold;
+  }
+
+  .form-group {
+    @apply mb-5 text-right;
+  }
+
+  .form-group label {
+    @apply block mb-2 text-text-dark font-medium;
+  }
+
+  .form-group input {
+    @apply w-full px-3 py-3 rounded-xl border border-gray-300 bg-white/80 font-vazir transition-all duration-300;
+  }
+
+  .form-group input:focus {
+    @apply outline-none border-persian-gold;
+    box-shadow: 0 0 8px rgba(255, 179, 0, 0.3);
+  }
+
+  .auth-btn {
+    @apply w-full py-3 rounded-full border-none font-vazir font-bold cursor-pointer mt-2.5 transition-all duration-300;
+  }
+
+  .btn-submit-login {
+    @apply bg-[#FFE082] text-[#3e2723];
+  }
+  
+  .btn-submit-login:hover {
+    @apply bg-[#FFD54F];
+  }
+
+  .btn-submit-signup {
+    @apply bg-persian-gold text-[#3e2723];
+  }
+  
+  .btn-submit-signup:hover {
+    @apply bg-[#FFCA28];
+  }
+
+  .auth-links {
+    @apply mt-5 text-sm;
+  }
+
+  .auth-links a {
+    @apply text-persian-blue font-bold;
+  }
+
+  .back-home {
+    @apply inline-block mt-5 text-white opacity-80 no-underline text-sm;
+  }
+
+  .back-home:hover {
+    @apply opacity-100 underline;
+  }
+
+  .form-alert {
+    @apply mb-4 p-3 rounded-lg bg-red-100 text-red-700 text-sm hidden;
+  }
+
+  .form-alert.is-visible {
+    @apply block;
+  }
+
   /* --- Typography Utilities --- */
   .section-header h3 {
     @apply relative inline-block text-forest-green text-[1.8rem] font-extrabold pb-4;
@@ -122,14 +187,6 @@
 }
 
 @layer utilities {
-  .btn-submit-login {
-    @apply bg-[#FFE082] text-[#3e2723] hover:bg-[#FFD54F] transition-colors font-bold py-3 px-6 rounded-full;
-  }
-  
-  .btn-submit-signup {
-    @apply bg-persian-gold text-[#3e2723] hover:bg-[#FFCA28] transition-colors font-bold py-3 px-6 rounded-full;
-  }
-  
   .group-btn {
     @apply flex-1 text-center py-2 text-xs font-bold text-forest-green bg-forest-green/10 border border-forest-green/20 rounded-lg hover:bg-forest-green hover:text-white transition-all hover:-translate-y-0.5;
   }
@@ -146,7 +203,6 @@
     @apply flex items-center gap-4;
   }
   
-  
   .logo-text {
     @apply flex flex-col;
   }
@@ -158,14 +214,4 @@
   .auth-buttons {
     @apply flex gap-4;
   }
-  
-  
-  .btn-login {
-    @apply bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600;
-  }
-
-  .btn-signup {
-    @apply bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600;
-  }
-
 }

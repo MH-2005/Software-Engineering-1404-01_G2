@@ -1,22 +1,42 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
-import { tripApi } from '@/services/api';
+import { useAuth } from '@/hooks/useAuth';
+import { tripApi, tripItemApi } from '@/services/api';
 import { getMockTrip } from '@/services/mockService';
 import { Trip, TripItemWithDay, BudgetLevel } from '@/types/trip';
 import Timeline from '@/components/Timeline';
 import Button from '@/components/ui/Button';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import AuthDialog from '@/components/auth/AuthDialog';
 import TripSummary from '@/containers/finalize-trip/TripSummery';
 import { BUDGET_LEVELS } from '@/containers/suggest-destination/constants';
 import { calculateCategoryCosts, formatPersianCurrency } from '@/utils/costCalculations';
+import { useNotification } from '@/contexts/NotificationContext';
 
 const FinalizeTrip: React.FC = () => {
     const { tripId } = useParams<{ tripId: string }>();
     const navigate = useNavigate();
+    const { success, error: showError, warning } = useNotification();
+    const { isAuthenticated, checkAuth, setUser } = useAuth();
 
     const [tripData, setTripData] = useState<Trip | null>(null);
     const [isEditingBudget, setIsEditingBudget] = useState(false);
     const [selectedBudget, setSelectedBudget] = useState<BudgetLevel>('MEDIUM');
+    const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+    const [confirmDialog, setConfirmDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        variant?: 'danger' | 'warning' | 'info';
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
+    const [isDialogLoading, setIsDialogLoading] = useState(false);
     const { data, isLoading, error, request } = useApi(getMockTrip);
 
     useEffect(() => {
@@ -36,7 +56,7 @@ const FinalizeTrip: React.FC = () => {
         if (!tripId) return;
 
         try {
-            await tripApi.updateItem(tripId, itemId, {
+            await tripItemApi.update(itemId, {
                 start_time: startTime,
                 end_time: endTime,
             });
@@ -56,63 +76,89 @@ const FinalizeTrip: React.FC = () => {
                     })),
                 };
             });
-        } catch (err) {
+
+            success('زمان با موفقیت به‌روزرسانی شد');
+        } catch (err: any) {
             console.error('Failed to update item time:', err);
-            alert('خطا در به‌روزرسانی زمان. لطفاً دوباره تلاش کنید.');
+            const errorMessage = err.response?.data?.error || 'خطا در به‌روزرسانی زمان. لطفاً دوباره تلاش کنید.';
+            showError(errorMessage);
         }
     };
 
     const handleDeleteItem = async (itemId: string) => {
         if (!tripId) return;
 
-        const confirmed = window.confirm('آیا از حذف این آیتم اطمینان دارید؟');
-        if (!confirmed) return;
+        setConfirmDialog({
+            isOpen: true,
+            title: 'حذف آیتم',
+            message: 'آیا از حذف این آیتم اطمینان دارید؟ این عملیات قابل بازگشت نیست.',
+            variant: 'danger',
+            onConfirm: async () => {
+                setIsDialogLoading(true);
+                try {
+                    await tripItemApi.delete(itemId);
 
-        try {
-            await tripApi.deleteItem(tripId, itemId);
+                    // Update local state
+                    setTripData((prev) => {
+                        if (!prev) return prev;
+                        return {
+                            ...prev,
+                            days: prev.days.map((day) => ({
+                                ...day,
+                                items: day.items.filter((item) => item.id !== itemId),
+                            })),
+                        };
+                    });
 
-            // Update local state
-            setTripData((prev) => {
-                if (!prev) return prev;
-                return {
-                    ...prev,
-                    days: prev.days.map((day) => ({
-                        ...day,
-                        items: day.items.filter((item) => item.id !== itemId),
-                    })),
-                };
-            });
-        } catch (err) {
-            console.error('Failed to delete item:', err);
-            alert('خطا در حذف آیتم. لطفاً دوباره تلاش کنید.');
-        }
+                    success('آیتم با موفقیت حذف شد');
+                } catch (err: any) {
+                    console.error('Failed to delete item:', err);
+                    const errorMessage = err.response?.data?.error || 'خطا در حذف آیتم. لطفاً دوباره تلاش کنید.';
+                    showError(errorMessage);
+                } finally {
+                    setIsDialogLoading(false);
+                    setConfirmDialog({ ...confirmDialog, isOpen: false });
+                }
+            },
+        });
     };
 
-    const handleSuggestAlternative = async (itemId: string) => {
+    const handleSuggestAlternative = async (_itemId: string) => {
         if (!tripId) return;
 
         try {
-            const response = await tripApi.suggestAlternative(tripId, itemId);
-            const alternativeItem = response.data;
+            // This would typically call an endpoint that suggests an alternative
+            // For now, we'll show a warning that this feature needs backend support
+            warning('این قابلیت نیازمند پشتیبانی سرویس پیشنهاد مکان است');
 
-            // Update local state with alternative item
-            setTripData((prev) => {
-                if (!prev) return prev;
-                return {
-                    ...prev,
-                    days: prev.days.map((day) => ({
-                        ...day,
-                        items: day.items.map((item) =>
-                            item.id === itemId ? alternativeItem : item
-                        ),
-                    })),
-                };
-            });
+            // When backend is ready, uncomment this:
+            // const response = await tripItemApi.replace(_itemId, {
+            //     new_place_id: 'suggested_place_id',
+            //     new_place_data: {
+            //         title: 'مکان جایگزین',
+            //         category: 'HISTORICAL',
+            //         estimated_cost: '0',
+            //     }
+            // });
 
-            alert('آیتم جایگزین با موفقیت پیشنهاد شد.');
-        } catch (err) {
+            // setTripData((prev) => {
+            //     if (!prev) return prev;
+            //     return {
+            //         ...prev,
+            //         days: prev.days.map((day) => ({
+            //             ...day,
+            //             items: day.items.map((item) =>
+            //                 item.id === _itemId ? response.data.new_item : item
+            //             ),
+            //         })),
+            //     };
+            // });
+
+            // success('آیتم جایگزین با موفقیت پیشنهاد شد');
+        } catch (err: any) {
             console.error('Failed to suggest alternative:', err);
-            alert('خطا در پیشنهاد آیتم جایگزین. لطفاً دوباره تلاش کنید.');
+            const errorMessage = err.response?.data?.error || 'خطا در پیشنهاد آیتم جایگزین. لطفاً دوباره تلاش کنید.';
+            showError(errorMessage);
         }
     };
 
@@ -165,17 +211,69 @@ const FinalizeTrip: React.FC = () => {
         if (!tripId || !selectedBudget) return;
 
         try {
-            await tripApi.updateTrip(tripId, { budget_level: selectedBudget });
+            await tripApi.update(tripId, { budget_level: selectedBudget });
             setTripData((prev) => {
                 if (!prev) return prev;
                 return { ...prev, budget_level: selectedBudget };
             });
             setIsEditingBudget(false);
-            alert('سطح بودجه با موفقیت به‌روزرسانی شد.');
-        } catch (err) {
+            success('سطح بودجه با موفقیت به‌روزرسانی شد');
+        } catch (err: any) {
             console.error('Failed to update budget level:', err);
-            alert('خطا در به‌روزرسانی سطح بودجه.');
+            const errorMessage = err.response?.data?.error || 'خطا در به‌روزرسانی سطح بودجه';
+            showError(errorMessage);
         }
+    };
+
+    const handleFinalSave = async () => {
+        // Check if user is authenticated
+        const isLoggedIn = await checkAuth();
+
+        if (!isLoggedIn) {
+            // Open auth dialog if not logged in
+            setIsAuthDialogOpen(true);
+            return;
+        }
+
+        // User is authenticated, proceed with final save
+        performFinalSave();
+    };
+
+    const performFinalSave = () => {
+        setConfirmDialog({
+            isOpen: true,
+            title: 'ذخیره نهایی سفر',
+            message: 'آیا از نهایی کردن این برنامه سفر اطمینان دارید؟',
+            variant: 'info',
+            onConfirm: async () => {
+                setIsDialogLoading(true);
+                try {
+                    // Here you can add any final save logic
+                    // For now, we'll just show a success message
+                    success('برنامه سفر با موفقیت ذخیره شد');
+
+                    // Optionally download PDF
+                    if (tripId) {
+                        await tripApi.downloadPDF(tripId, `trip_${tripData?.city || tripId}.pdf`);
+                        success('فایل PDF برنامه سفر دانلود شد');
+                    }
+                } catch (err: any) {
+                    console.error('Failed to save trip:', err);
+                    const errorMessage = err.response?.data?.error || 'خطا در ذخیره نهایی';
+                    showError(errorMessage);
+                } finally {
+                    setIsDialogLoading(false);
+                    setConfirmDialog({ ...confirmDialog, isOpen: false });
+                }
+            },
+        });
+    };
+
+    const handleAuthSuccess = (user: any) => {
+        setUser(user);
+        success(`خوش آمدید ${user.first_name || user.email}`);
+        // After successful authentication, perform the final save
+        performFinalSave();
     };
 
     if (isLoading) {
@@ -205,6 +303,24 @@ const FinalizeTrip: React.FC = () => {
 
     return (
         <div className="container mx-auto py-8">
+            {/* Auth Dialog */}
+            <AuthDialog
+                isOpen={isAuthDialogOpen}
+                onClose={() => setIsAuthDialogOpen(false)}
+                onSuccess={handleAuthSuccess}
+                initialMode="signup"
+            />
+
+            {/* Confirm Dialog */}
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+                onConfirm={confirmDialog.onConfirm}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                variant={confirmDialog.variant}
+                isLoading={isDialogLoading}
+            />
 
             {/* Timelines */}
             <div className="mb-8">
@@ -366,7 +482,7 @@ const FinalizeTrip: React.FC = () => {
 
                             <div className="w-full">
                                 <Button
-                                    onClick={() => alert('ذخیره تغییرات')}
+                                    onClick={handleFinalSave}
                                     variant="primary"
                                     className="w-full px-6 py-3"
                                 >

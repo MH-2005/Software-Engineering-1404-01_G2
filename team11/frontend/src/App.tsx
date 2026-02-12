@@ -4,26 +4,39 @@ import HomePage from '@/pages/HomePage';
 import SuggestDestination from './pages/SuggestDestination';
 import CreateTrip from './pages/CreateTrip';
 import FinalizeTrip from './pages/FinalizeTrip';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Trips from './pages/Trips';
 import ScrollToTop from './components/ScrollToTop';
+import { NotificationProvider } from '@/contexts/NotificationContext';
+import NotificationContainer from '@/components/ui/NotificationContainer';
 
 
 function App() {
   return (
-    <Router basename="/team11">
-      <ScrollToTop />
-      <Routes>
-        {/* Main Application Shell */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="create-trip" element={<CreateTrip />} />
-          <Route path="suggest-destination" element={<SuggestDestination />} />
-          <Route path="finalize-trip/:tripId" element={<FinalizeTrip />} />
-        </Route>
+    <NotificationProvider>
+      <Router basename="/team11">
+        <ScrollToTop />
+        <NotificationContainer />
+        <Routes>
+          {/* Auth Routes (without MainLayout) */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-        {/* Catch-all redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          {/* Main Application Shell */}
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="create-trip" element={<CreateTrip />} />
+            <Route path="suggest-destination" element={<SuggestDestination />} />
+            <Route path="finalize-trip/:tripId" element={<FinalizeTrip />} />
+            <Route path="trips" element={<Trips />} />
+          </Route>
+
+          {/* Catch-all redirect to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </NotificationProvider>
   );
 }
 

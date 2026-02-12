@@ -28,7 +28,7 @@ const SuggestDestinationForm = () => {
         style: null,
         region: null,
     });
-    
+
     const [availableInterests, setAvailableInterests] = useState(INITIAL_INTERESTS);
     const [selectedInterestValues, setSelectedInterestValues] = useState<string[]>([]);
     const [isAdding, setIsAdding] = useState(false);
