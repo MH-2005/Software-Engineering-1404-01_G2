@@ -180,16 +180,17 @@ class TripViewSet(viewsets.ViewSet):
         
         Returns all trips for the authenticated user, sorted by date.
         Past trips are marked with is_past flag for UI styling.
+        Requires authentication via JWT token.
         """
-        user_id = request.query_params.get('user_id')
-        
-        if not user_id:
+        # Check if user is authenticated
+        if not request.user or not request.user.is_authenticated:
             return Response(
-                {"error": "user_id parameter required"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Authentication required"},
+                status=status.HTTP_401_UNAUTHORIZED
             )
         
-        trips = TripService.get_all_trips(user_id=int(user_id))
+        # Get trips for authenticated user
+        trips = TripService.get_all_trips(user_id=request.user.id)
         serializer = TripListSerializer(trips, many=True)
         return Response(serializer.data)
     
@@ -200,17 +201,16 @@ class TripViewSet(viewsets.ViewSet):
         
         Converts a guest trip (user_id=null) to a user trip.
         Use case: User creates trip without login, then logs in and claims it.
-        
-        Request body: {"user_id": 123}
+        Requires authentication via JWT token.
         """
-        user_id = request.data.get('user_id')
-        
-        if not user_id:
+        # Check if user is authenticated
+        if not request.user or not request.user.is_authenticated:
             return Response(
-                {"error": "user_id required in request body"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Authentication required"},
+                status=status.HTTP_401_UNAUTHORIZED
             )
         
+        # Get the trip
         trip = TripService.get_trip_detail(int(pk))
         
         if not trip:
@@ -219,14 +219,15 @@ class TripViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
+        # Check if already claimed
         if trip.user_id is not None:
             return Response(
                 {"error": "Trip is already claimed by another user"},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Claim the trip
-        updated_trip = TripService.update_trip(int(pk), {'user_id': int(user_id)})
+        # Claim the trip for authenticated user
+        updated_trip = TripService.update_trip(int(pk), {'user_id': request.user.id})
         
         return Response(
             TripDetailSerializer(updated_trip).data,
@@ -348,7 +349,7 @@ class TripItemViewSet(viewsets.ViewSet):
     """API endpoints for TripItem management"""
     
     def list(self, request):
-        """GET /api/trip-items/?day_id=X - List items for a day"""
+        """GET /api/items/?day_id=X - List items for a day"""
         day_id = request.query_params.get('day_id')
         
         if not day_id:
@@ -361,8 +362,21 @@ class TripItemViewSet(viewsets.ViewSet):
         serializer = TripItemSerializer(items, many=True)
         return Response(serializer.data)
     
+    def retrieve(self, request, pk=None):
+        """GET /api/items/{id}/ - Get a single item"""
+        item = TripItemService.get_item_by_id(int(pk))
+        
+        if not item:
+            return Response(
+                {"error": "Item not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = TripItemSerializer(item)
+        return Response(serializer.data)
+    
     def create(self, request):
-        """POST /api/trip-items/ - Create a new item"""
+        """POST /api/items/ - Create a new item"""
         serializer = TripItemSerializer(data=request.data)
         
         if not serializer.is_valid():
@@ -390,8 +404,8 @@ class TripItemViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
     
-    def update(self, request, pk=None):
-        """PUT /api/trip-items/{id}/ - Update an item"""
+    def partial_update(self, request, pk=None):
+        """PATCH /api/items/{id}/ - Update an item (API #6)"""
         serializer = TripItemSerializer(data=request.data, partial=True)
         
         if not serializer.is_valid():
@@ -417,7 +431,7 @@ class TripItemViewSet(viewsets.ViewSet):
             )
     
     def destroy(self, request, pk=None):
-        """DELETE /api/trip-items/{id}/ - Delete an item"""
+        """DELETE /api/items/{id}/ - Delete an item (API #7)"""
         if TripItemService.delete_item(int(pk)):
             return Response(status=status.HTTP_204_NO_CONTENT)
         
@@ -428,7 +442,7 @@ class TripItemViewSet(viewsets.ViewSet):
     
     @action(detail=True, methods=['post'])
     def lock(self, request, pk=None):
-        """POST /api/trip-items/{id}/lock/ - Lock an item"""
+        """POST /api/items/{id}/lock/ - Lock an item"""
         item = TripItemService.lock_item(int(pk))
         
         if not item:
@@ -441,7 +455,7 @@ class TripItemViewSet(viewsets.ViewSet):
     
     @action(detail=True, methods=['post'])
     def unlock(self, request, pk=None):
-        """POST /api/trip-items/{id}/unlock/ - Unlock an item"""
+        """POST /api/items/{id}/unlock/ - Unlock an item"""
         item = TripItemService.unlock_item(int(pk))
         
         if not item:
@@ -454,7 +468,7 @@ class TripItemViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['post'])
     def reorder(self, request):
-        """POST /api/trip-items/reorder/ - Reorder items in a day"""
+        """POST /api/items/reorder/ - Reorder items in a day"""
         day_id = request.data.get('day_id')
         item_order = request.data.get('item_order', [])
         
@@ -470,14 +484,17 @@ class TripItemViewSet(viewsets.ViewSet):
     @action(detail=True, methods=['post'])
     def replace(self, request, pk=None):
         """
-        POST /api/trip-items/{id}/replace/ - Replace item with alternative
+        POST /api/items/{id}/replace/ - Replace item with alternative (API #8)
         
         Replaces current item with a new place from alternatives list.
-        New place data should come from Mohammad Hossein's Facility Service.
+        The new item will keep the same time slot as the replaced item.
+        
+        Future Integration: Should call Mohammad Hossein's Facility Service 
+        to get place details automatically from place_id.
         
         Request body: {
-            "new_place_id": "string",
-            "new_place_data": {
+            "new_place_id": "string",        # Required
+            "new_place_data": {              # Optional - will come from Facility Service
                 "title": "string",
                 "category": "string",
                 "address": "string",
@@ -486,8 +503,6 @@ class TripItemViewSet(viewsets.ViewSet):
                 "estimated_cost": float
             }
         }
-        
-        The new item will keep the same time slot as the replaced item.
         """
         new_place_id = request.data.get('new_place_id')
         new_place_data = request.data.get('new_place_data', {})
@@ -506,6 +521,13 @@ class TripItemViewSet(viewsets.ViewSet):
                 {"error": "Item not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+        # TODO: Integration with Facility Service
+        # from externalServices.grpc.services.facility_client import FacilityClient
+        # facility_client = FacilityClient()
+        # new_place_data = facility_client.get_place_by_id(new_place_id)
+        # if not new_place_data:
+        #     return Response({"error": "Place not found in Facility Service"}, 404)
         
         # Prepare update data - keep same time, update place details
         update_data = {

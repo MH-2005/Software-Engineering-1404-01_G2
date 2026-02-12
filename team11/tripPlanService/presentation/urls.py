@@ -5,7 +5,7 @@ from .views import test, ok, TripViewSet, TripDayViewSet, TripItemViewSet
 router = DefaultRouter()
 router.register(r'trips', TripViewSet, basename='trip')
 router.register(r'trip-days', TripDayViewSet, basename='trip-day')
-router.register(r'trip-items', TripItemViewSet, basename='trip-item')
+router.register(r'items', TripItemViewSet, basename='item')
 
 urlpatterns = [
     path("test/", test),

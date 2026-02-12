@@ -1,6 +1,17 @@
 """
 PDF Generator for Trip Exports
 Generates PDF files from Trip data for printing and sharing
+
+TODO: Persian Font Support
+Current limitation: Persian text may not render correctly with default fonts.
+To fix:
+1. Add a Persian font file (e.g., Vazir.ttf, Tahoma.ttf) to project
+2. Register it with reportlab:
+   from reportlab.pdfbase import pdfmetrics
+   from reportlab.pdfbase.ttfonts import TTFont
+   pdfmetrics.registerFont(TTFont('Vazir', 'path/to/Vazir.ttf'))
+3. Use the font in ParagraphStyle:
+   ParagraphStyle(..., fontName='Vazir')
 """
 from io import BytesIO
 from datetime import datetime
