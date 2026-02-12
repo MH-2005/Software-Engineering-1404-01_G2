@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Star, MapPin, X, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Place } from '../data/mockPlaces';
+import { favoritesService } from '../services/favoritesService';
 
 interface PlaceCardProps {
   place: Place;
@@ -16,6 +17,7 @@ export default function PlaceCard({
   isFavorite,
 }: PlaceCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % place.images.length);
@@ -23,6 +25,25 @@ export default function PlaceCard({
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + place.images.length) % place.images.length);
+  };
+
+  const handleToggleFavorite = async () => {
+    if (isTogglingFavorite) return;
+
+    setIsTogglingFavorite(true);
+    try {
+      const response = await favoritesService.toggleFavorite(Number(place.id));
+      
+      if (response.message === 'added' || response.message === 'removed') {
+        // Update parent component state
+        onToggleFavorite(place);
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+      alert('خطا در ذخیره علاقه‌مندی. لطفا دوباره تلاش کنید.');
+    } finally {
+      setIsTogglingFavorite(false);
+    }
   };
 
   return (
@@ -72,8 +93,9 @@ export default function PlaceCard({
         </button>
 
         <button
-          onClick={() => onToggleFavorite(place)}
-          className="absolute top-3 left-3 bg-white/90 hover:bg-white p-2 rounded-full transition-colors shadow-md"
+          onClick={handleToggleFavorite}
+          disabled={isTogglingFavorite}
+          className="absolute top-3 left-3 bg-white/90 hover:bg-white p-2 rounded-full transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Heart
             className={`w-5 h-5 ${

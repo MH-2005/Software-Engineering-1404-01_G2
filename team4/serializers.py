@@ -390,6 +390,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
 
 
 class FacilityFilterSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False, allow_blank=True)
     village = serializers.CharField(required=False, allow_blank=True)
     city = serializers.CharField(required=False, allow_blank=True)
     province = serializers.CharField(required=False, allow_blank=True)

@@ -160,6 +160,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
         List facilities with advanced filtering and sorting.
         
         Request Body:
+        - name: Search in facility name (name_fa and name_en)
         - village: Filter by village name (highest priority)
         - city: Filter by city name (medium priority)
         - province: Filter by province name (lowest priority)
@@ -182,6 +183,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
         region_type, region_name = self._get_region_filter_from_data(data)
         
         # Extract other parameters
+        name_query = data.get('name')
         category_name = data.get('category')
         amenity_name = data.get('amenity')
         price_tier = data.get('price_tier')
@@ -204,6 +206,13 @@ class FacilityViewSet(viewsets.ModelViewSet):
         # Start with base queryset
         facilities = self.queryset
         
+        # Apply name search filter
+        if name_query:
+            facilities = facilities.filter(
+                Q(name_fa__icontains=name_query) |
+                Q(name_en__icontains=name_query)
+            )
+        
         # Apply region filter
         facilities = self._apply_region_filter(facilities, region_type, region_name)
         
@@ -219,8 +228,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
             facilities = facilities.filter(
                 amenities__name_en__iexact=amenity_name
             ) | facilities.filter(
-                amenities__name_fa__iexact=amenity_name
-            )
+                amenities__name_fa__iexact=amenity_name)
         
         # Apply price tier filter
         if price_tier:
@@ -271,6 +279,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
         Search facilities with advanced filtering and sorting.
         
         Request Body:
+        - name: Search in facility name (name_fa and name_en)
         - village: Filter by village name (highest priority)
         - city: Filter by city name (medium priority)
         - province: Filter by province name (lowest priority)
@@ -293,6 +302,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
         region_type, region_name = self._get_region_filter_from_data(data)
         
         # Extract other parameters
+        name_query = data.get('name')
         category_name = data.get('category')
         amenity_name = data.get('amenity')
         price_tier = data.get('price_tier')
@@ -314,6 +324,13 @@ class FacilityViewSet(viewsets.ModelViewSet):
         
         # Start with base queryset
         facilities = self.queryset
+        
+        # Apply name search filter
+        if name_query:
+            facilities = facilities.filter(
+                Q(name_fa__icontains=name_query) |
+                Q(name_en__icontains=name_query)
+            )
         
         # Apply region filter
         facilities = self._apply_region_filter(facilities, region_type, region_name)
@@ -898,6 +915,13 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         facility_id = request.data.get('facility') or request.query_params.get('facility')
         if not facility_id:
             return Response({"detail": "Facility ID required"}, status=400)
+
+        # For development: handle anonymous users
+        if not request.user or not request.user.is_authenticated:
+            return Response({
+                "detail": "Authentication required. Please login first.",
+                "status": "error"
+            }, status=401)
 
         # Get the facility object (lives in the same DB as Favorite)
         facility = get_object_or_404(Facility, pk=facility_id)

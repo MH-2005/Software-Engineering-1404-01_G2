@@ -8,6 +8,7 @@ interface FavoritesPanelProps {
   onRemoveFavorite: (placeId: string) => void;
 }
 
+
 export default function FavoritesPanel({
   favorites,
   onClose,
