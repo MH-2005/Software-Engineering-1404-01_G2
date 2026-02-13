@@ -7,8 +7,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django.core.exceptions import ObjectDoesNotExist
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
-from drf_spectacular.types import OpenApiTypes
 from .fields import Point
 import os
 import requests
@@ -44,33 +42,6 @@ class StandardResultsSetPagination(PageNumberPagination):
 # ViewSets
 # =====================================================
 
-@extend_schema_view(
-    list=extend_schema(
-        tags=['Facilities'],
-        request=FacilityFilterSerializer,
-        responses={200: FacilityListSerializer(many=True)}
-    ),
-    retrieve=extend_schema(tags=['Facilities']),
-    create=extend_schema(
-        tags=['Facilities'],
-        request=FacilityCreateSerializer,
-        responses={201: FacilityDetailSerializer}
-    ),
-    update=extend_schema(tags=['Facilities']),
-    partial_update=extend_schema(tags=['Facilities']),
-    destroy=extend_schema(tags=['Facilities']),
-    search=extend_schema(
-        tags=['Facilities'],
-        request=FacilityFilterSerializer,
-        responses={200: FacilityListSerializer(many=True)},
-        description='Search facilities with filters (village, city, province, category, amenity)'
-    ),
-    nearby=extend_schema(tags=['Facilities']),
-    nearby_search=extend_schema(tags=['Facilities']),
-    compare=extend_schema(tags=['Facilities']),
-    reviews=extend_schema(tags=['Facilities']),
-    emergency=extend_schema(tags=['Facilities']),
-)
 class FacilityViewSet(viewsets.ModelViewSet):
     """
     List facilities with search and filters
@@ -468,16 +439,6 @@ class FacilityViewSet(viewsets.ModelViewSet):
         
         return Response(comparison)
     
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='lat', type=OpenApiTypes.FLOAT, required=True, description='Latitude'),
-            OpenApiParameter(name='lng', type=OpenApiTypes.FLOAT, required=True, description='Longitude'),
-            OpenApiParameter(name='radius', type=OpenApiTypes.INT, required=True, description='Search radius in meters'),
-            OpenApiParameter(name='categories', type=OpenApiTypes.STR, required=False, description='Comma-separated category names'),
-            OpenApiParameter(name='price_tiers', type=OpenApiTypes.STR, required=False, description='Comma-separated price tiers (unknown,free,budget,moderate,expensive,luxury)'),
-        ],
-        responses={200: NearbyPlaceSerializer(many=True)}
-    )
     @action(detail=False, methods=['get'], url_path='nearby')
     def nearby_search(self, request):
         """
@@ -714,10 +675,6 @@ class FacilityViewSet(viewsets.ModelViewSet):
         })
 
 
-@extend_schema_view(
-    list=extend_schema(tags=['Categories']),
-    retrieve=extend_schema(tags=['Categories']),
-)
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for browsing facility categories.
@@ -745,27 +702,6 @@ def base(request):
 # Region Search API
 # =====================================================
 
-@extend_schema(
-    tags=['Regions'],
-    parameters=[
-        OpenApiParameter(
-            name='query',
-            type=OpenApiTypes.STR,
-            location=OpenApiParameter.QUERY,
-            required=True,
-            description='Search query string for region name'
-        ),
-        OpenApiParameter(
-            name='region_type',
-            type=OpenApiTypes.STR,
-            location=OpenApiParameter.QUERY,
-            required=False,
-            enum=['province', 'city', 'village'],
-            description='Filter by region type'
-        ),
-    ],
-    responses={200: RegionSearchResultSerializer(many=True)}
-)
 @api_view(['GET'])
 def search_regions(request):
     """
@@ -811,14 +747,6 @@ def search_regions(request):
 # Favorite ViewSet
 # =====================================================
 
-@extend_schema_view(
-    list=extend_schema(tags=['Favorites']),
-    retrieve=extend_schema(tags=['Favorites']),
-    create=extend_schema(tags=['Favorites']),
-    update=extend_schema(tags=['Favorites']),
-    partial_update=extend_schema(tags=['Favorites']),
-    destroy=extend_schema(tags=['Favorites']),
-)
 class FavoriteViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing user favorites.
@@ -843,20 +771,6 @@ class FavoriteViewSet(viewsets.ModelViewSet):
             'facility__city__province'
         )
     
-    @extend_schema(
-        summary="Add a facility to favorites",
-        parameters=[
-            OpenApiParameter(
-                name='facility', 
-                description='ID of the facility to favorite', 
-                required=True, 
-                type=int,
-                location=OpenApiParameter.QUERY
-            ),
-        ],
-        request=None, 
-        responses={201: FavoriteSerializer}
-    )
     def create(self, request):
         """Add a facility to user's favorites."""
         facility_id = request.query_params.get('facility')
@@ -894,22 +808,6 @@ class FavoriteViewSet(viewsets.ModelViewSet):
                 {"detail": "علاقه‌مندی پیدا نشد."}, 
                 status=status.HTTP_404_NOT_FOUND
             )
-    @extend_schema(
-        summary="Toggle favorite status",
-        tags=['Favorites'],
-        description="Add a facility to favorites if it isn't there, or remove it if it is.",
-        parameters=[
-            OpenApiParameter(
-                name='facility', 
-                description='ID of the facility to toggle', 
-                required=True, 
-                type=str, # Using str is safest for IDs/UUIDs
-                location=OpenApiParameter.QUERY
-            ),
-        ],
-        request=None,
-        responses={200: OpenApiResponse(description="Status changed")}
-    )
     @action(detail=False, methods=['post'])
     def toggle(self, request):
         facility_id = request.data.get('facility') or request.query_params.get('facility')
@@ -944,21 +842,6 @@ class FavoriteViewSet(viewsets.ModelViewSet):
             )
             return Response({"status": "added", "favorited": True})
 
-    @extend_schema(
-        summary="Check if facility is favorited",
-        tags=['Favorites'],
-        description="Returns true if the specified facility is in the current user's favorite list.",
-        parameters=[
-            OpenApiParameter(
-                name='facility', 
-                description='ID of the facility to check', 
-                required=True, 
-                type=str, 
-                location=OpenApiParameter.QUERY
-            ),
-        ],
-        responses={200: OpenApiResponse(description="Success")}
-    )
     @action(detail=False, methods=['get'])
     def check(self, request):
         facility_id = request.query_params.get('facility')
@@ -986,14 +869,6 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 # Review ViewSet
 # =====================================================
 
-@extend_schema_view(
-    list=extend_schema(tags=['Reviews']),
-    retrieve=extend_schema(tags=['Reviews']),
-    create=extend_schema(tags=['Reviews']),
-    update=extend_schema(tags=['Reviews']),
-    partial_update=extend_schema(tags=['Reviews']),
-    destroy=extend_schema(tags=['Reviews']),
-)
 class ReviewViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing facility reviews and ratings.
@@ -1125,27 +1000,6 @@ class RoutingView(APIView):
     API View to handle routing requests via an external Map Service.
     """
 
-    @extend_schema(
-        summary="Calculate route and navigation",
-        description="Send origin and destination coordinates to receive route details, distance, and ETA.",
-        # Individual input boxes for the UI
-        parameters=[
-            OpenApiParameter(name='type', description='Vehicle type', required=True, type=str, enum=['car', 'motorcycle']),
-            OpenApiParameter(name='origin', description='lat,lng (e.g. 35.72,51.43)', required=True, type=str),
-            OpenApiParameter(name='destination', description='lat,lng (e.g. 35.67,51.29)', required=True, type=str),
-            OpenApiParameter(name='avoidTrafficZone', type=bool, default=False),
-            OpenApiParameter(name='avoidOddEvenZone', type=bool, default=False),
-            OpenApiParameter(name='alternative', type=bool, default=False),
-        ],
-        # The JSON body (matches your serializer)
-        request=RoutingRequestSerializer,
-        responses={
-            200: OpenApiResponse(description="Route data retrieved successfully"),
-            400: OpenApiResponse(description="Invalid input data"),
-            503: OpenApiResponse(description="Map service is unavailable")
-        },
-        tags=['Navigation']
-    )
     def post(self, request):
         # Your logic remains exactly the same
         serializer = RoutingRequestSerializer(data=request.data)

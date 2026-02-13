@@ -1,6 +1,4 @@
 from rest_framework import serializers
-from drf_spectacular.utils import extend_schema_field
-from drf_spectacular.types import OpenApiTypes
 from .fields import Point
 from team4.models import (
     Province, City, Category, Amenity, Village,
@@ -26,7 +24,6 @@ class CitySerializer(serializers.ModelSerializer):
             'province', 'location'
         ]
     
-    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_location(self, obj):
         return {
             'type': 'Point',
@@ -97,7 +94,6 @@ class FacilityListSerializer(serializers.ModelSerializer):
             'is_24_hour', 'amenities'
         ]
     
-    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_location(self, obj):
         if obj.location:
             return {
@@ -106,12 +102,10 @@ class FacilityListSerializer(serializers.ModelSerializer):
             }
         return None
     
-    @extend_schema_field(OpenApiTypes.STR)
     def get_primary_image(self, obj):
         image = obj.get_primary_image()
         return image.image_url if image else None
     
-    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_price_from(self, obj):
         """Get minimum price or tier range"""
         min_price = obj.get_min_price()
@@ -132,7 +126,6 @@ class FacilityListSerializer(serializers.ModelSerializer):
         
         return None
     
-    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_amenities(self, obj):
         """Return list of amenities with just fa and en names"""
         return SimpleAmenitySerializer(obj.amenities.all(), many=True).data
@@ -161,7 +154,6 @@ class FacilityDetailSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
     
-    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_location(self, obj):
         if obj.location:
             return {
@@ -258,7 +250,6 @@ class VillageSerializer(serializers.ModelSerializer):
             'city', 'location'
         ]
     
-    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_location(self, obj):
         if obj.location:
             return {
@@ -332,7 +323,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['review_id', 'user_id', 'is_approved', 'created_at', 'updated_at']
     
-    @extend_schema_field(OpenApiTypes.STR)
     def get_user_name(self, obj):
         # Return user_id as string since we can't access user object from different DB
         return f"User {obj.user_id}"

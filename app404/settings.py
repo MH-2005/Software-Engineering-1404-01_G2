@@ -27,8 +27,6 @@ INSTALLED_APPS = [
 
     # 3rd-party
     "corsheaders",
-    "rest_framework",
-    "drf_spectacular",
 
     # Local
     "core",
@@ -125,45 +123,3 @@ else:
 
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
-
-# Django REST Framework Configuration
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
-# drf-spectacular Settings
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Iran Explorer API',
-    'DESCRIPTION': 'Comprehensive tourism and geography service system for Iran',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
-    'SCHEMA_PATH_PREFIX': r'/api/',
-    'CONTACT': {
-        'name': 'Software Engineering Team',
-        'email': 'support@iranexplorer.ir',
-    },
-    'LICENSE': {
-        'name': 'MIT License',
-    },
-    'SERVERS': [
-        {
-            'url': 'http://localhost:8000',
-            'description': 'Development server',
-        },
-    ],
-    'TAGS': [
-        {'name': 'Authentication', 'description': 'User authentication and authorization'},
-        {'name': 'Geography', 'description': 'Provinces, cities and geographic data'},
-        {'name': 'Facilities', 'description': 'Hotels, restaurants, hospitals and other facilities'},
-        {'name': 'Categories', 'description': 'Facility categories management'},
-        {'name': 'Reviews', 'description': 'User reviews and ratings'},
-        {'name': 'Favorites', 'description': 'User favorites management'},
-        {'name': 'Regions', 'description': 'Region search and location services'},
-        {'name': 'Wiki', 'description': 'Encyclopedia and knowledge base'},
-        {'name': 'Media', 'description': 'Photos and reviews'},
-        {'name': 'Recommendations', 'description': 'Smart destination recommendations'},
-        {'name': 'Travel Planning', 'description': 'Trip planning and itinerary'},
-        {'name': 'Maps', 'description': 'Interactive maps and geographic services'},
-    ],
-}

@@ -8,6 +8,9 @@ import {
   Theater,
   Dumbbell,
   ShoppingBag,
+  Building2,
+  Cross,
+  Activity,
 } from 'lucide-react';
 import { categories } from '../data/mockPlaces';
 
@@ -26,6 +29,9 @@ const iconMap: { [key: string]: any } = {
   Theater,
   Dumbbell,
   ShoppingBag,
+  Hospital: Building2,
+  Pill: Cross,
+  Stethoscope: Activity,
 };
 
 export default function CategoryFilter({
