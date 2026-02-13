@@ -1,3 +1,4 @@
+
 """
 Trip Generator - Main algorithm for creating trips
 """
@@ -25,31 +26,18 @@ class TripGenerator:
 
     def generate(
             self,
-            user:User,
-            province: str,
-            city: Optional[str],
-            interests: List[str],
-            budget_level: str,
-            start_date: date,
-            end_date: Optional[date] = None,
-            daily_available_hours: int = 12,
-            travel_style: str = 'SOLO'
-    ) -> Trip:
+            province,
+            city=None,
+            interests=None,
+            budget_level='MEDIUM',
+            start_date=None,
+            end_date=None,
+            daily_available_hours=8,
+            travel_style='SOLO',
+            user_id=None
+    ):
         """
-        Main trip generation algorithm
-
-        Args:
-            province: Province name (required)
-            city: City name (optional)
-            interests: List of user interests
-            budget_level: ECONOMY/MEDIUM/LUXURY/UNLIMITED
-            start_date: Trip start date
-            end_date: Trip end date (optional, default 3 days)
-            daily_available_hours: Hours available per day (default 12)
-            travel_style: SOLO/COUPLE/FAMILY/FRIENDS/BUSINESS
-
-        Returns:
-            Complete Trip object with days and items
+        Generate a complete trip plan
         """
 
         # 1. Calculate duration
@@ -83,7 +71,7 @@ class TripGenerator:
             travel_style=travel_style,
             generation_strategy='MIXED',
             status='DRAFT',
-            user=user,
+            user_id=user_id,
         )
 
         # 4. Generate days

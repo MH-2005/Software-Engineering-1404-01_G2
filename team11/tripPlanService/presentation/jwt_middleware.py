@@ -46,7 +46,7 @@ class JWTAuthMiddleware(MiddlewareMixin):
 
             user_id = payload.get("sub")
             if user_id is not None:
-                request.jwt_user_id = int(user_id)
+                request.jwt_user_id = user_id
                 request.jwt_payload = payload
 
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):

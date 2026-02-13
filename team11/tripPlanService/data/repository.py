@@ -13,10 +13,10 @@ class TripRepository:
     """Repository for Trip model operations"""
 
     @staticmethod
-    def get_all(user_id: Optional[int] = None, status: Optional[str] = None) -> QuerySet[Trip]:
+    def get_all(user_id: Optional[str] = None, status: Optional[str] = None) -> QuerySet[Trip]:
         """Fetch all trips with optional filters"""
         queryset = Trip.objects.select_related(
-            'user', 'copied_from_trip').all()
+            'copied_from_trip').all()
 
         if user_id:
             queryset = queryset.filter(user_id=user_id)
@@ -28,7 +28,7 @@ class TripRepository:
     @staticmethod
     def get_by_id(trip_id: int) -> Optional[Trip]:
         """Fetch a single trip with all related data"""
-        return Trip.objects.select_related('user', 'copied_from_trip').prefetch_related(
+        return Trip.objects.select_related('copied_from_trip').prefetch_related(
             Prefetch('days', queryset=TripDay.objects.order_by('day_index')),
             'days__items',
             'share_links',
@@ -372,12 +372,10 @@ class UserMediaRepository:
     @staticmethod
     def get_by_trip(trip_id: int) -> QuerySet[UserMedia]:
         """Get all media for a trip"""
-        return UserMedia.objects.filter(trip_id=trip_id).select_related(
-            'user'
-        ).order_by('-uploaded_at')
+        return UserMedia.objects.filter(trip_id=trip_id).order_by('-uploaded_at')
 
     @staticmethod
-    def get_by_user(user_id: int, trip_id: Optional[int] = None) -> QuerySet[UserMedia]:
+    def get_by_user(user_id: str, trip_id: Optional[int] = None) -> QuerySet[UserMedia]:
         """Get all media uploaded by a user"""
         queryset = UserMedia.objects.filter(user_id=user_id)
         if trip_id:

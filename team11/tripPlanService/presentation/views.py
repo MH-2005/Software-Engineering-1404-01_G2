@@ -77,17 +77,24 @@ class TripViewSet(viewsets.ViewSet):
         user_id = request.query_params.get('user_id')
         status_filter = request.query_params.get('status')
 
+        # If user_id is not provided in query params, try to get it from JWT for "my trips"
+        if not user_id:
+            user_id = getattr(request, 'jwt_user_id', None)
+
         trips = TripService.get_all_trips(
-            user_id=int(user_id) if user_id else None,
+            user_id=user_id,
             status=status_filter
         )
 
         serializer = TripListSerializer(trips, many=True)
-        return Response(serializer.data)
+        return Response({
+            "count": len(trips),
+            "results": serializer.data
+        })
 
     def retrieve(self, request, pk=None):
         """GET /api/trips/{id}/ - Get trip details"""
-        trip = TripService.get_trip_detail(int(pk))
+        trip = TripService.get_trip_detail(pk)
 
         if not trip:
             return Response(
@@ -109,8 +116,16 @@ class TripViewSet(viewsets.ViewSet):
             )
 
         try:
+            # Inject user_id from JWT if available
+            user_id = getattr(request, 'jwt_user_id', None)
+            
             # Use serializer.save() which calls create()
-            trip = serializer.save()
+            # Pass user_id explicitly to save method (serializer needs to handle it or we pass it to perform_create equivalent)
+            # Since TripCreateUpdateSerializer.create doesn't accept user_id in validated_data by default,
+            # we need to pass it as an additional argument or add it to validated_data
+            
+            # Actually, serializer.save(**kwargs) passes kwargs to create()
+            trip = serializer.save(user_id=user_id)
 
             return Response(
                 TripDetailSerializer(trip).data,
@@ -133,7 +148,7 @@ class TripViewSet(viewsets.ViewSet):
     def _update_trip(self, request, pk, partial=False):
         """Helper method for update and partial_update"""
         # Ownership check
-        trip = TripService.get_trip_detail(int(pk))
+        trip = TripService.get_trip_detail(pk)
         if not trip:
             return Response(
                 {"error": "Trip not found"},
@@ -147,7 +162,7 @@ class TripViewSet(viewsets.ViewSet):
             )
 
         serializer = TripCreateUpdateSerializer(
-            data=request.data, partial=partial)
+            trip, data=request.data, partial=partial)
 
         if not serializer.is_valid():
             return Response(
@@ -325,19 +340,12 @@ class TripViewSet(viewsets.ViewSet):
         if travel_style not in valid_styles:
             travel_style = 'SOLO'
 
-        user_instance = None
-        if user_id:
-            try:
-                user_instance = User.objects.get(pk=user_id)
-            except User.DoesNotExist:
-                user_instance = None  # ادامه به عنوان مهمان
-
         try:
             # 5. تولید سفر با TripGenerator
             generator = TripGenerator()
 
             trip = generator.generate(
-                user=user_instance,
+                user_id=user_id,
                 province=province,
                 city=city,
                 interests=interests,
@@ -429,7 +437,10 @@ class TripViewSet(viewsets.ViewSet):
 
         trips = TripService.search_trips(query)
         serializer = TripListSerializer(trips, many=True)
-        return Response(serializer.data)
+        return Response({
+            "count": len(trips),
+            "results": serializer.data
+        })
 
     @action(detail=False, methods=['get'])
     def history(self, request):
@@ -451,7 +462,10 @@ class TripViewSet(viewsets.ViewSet):
         # Get trips for authenticated user
         trips = TripService.get_all_trips(user_id=user_id)
         serializer = TripListSerializer(trips, many=True)
-        return Response(serializer.data)
+        return Response({
+            "count": len(trips),
+            "results": serializer.data
+        })
 
     @action(detail=True, methods=['post'])
     def claim(self, request, pk=None):

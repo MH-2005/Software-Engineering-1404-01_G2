@@ -149,5 +149,5 @@ class TripReviewAdmin(ImportExportMixin, admin.ModelAdmin):
 
 @admin.register(UserMedia)
 class UserMediaAdmin(ImportExportMixin, admin.ModelAdmin):
-    list_display = ['media_id', 'trip', 'user', 'media_type', 'uploaded_at']
+    list_display = ['media_id', 'trip', 'user_id', 'media_type', 'uploaded_at']
     list_filter = ['media_type']

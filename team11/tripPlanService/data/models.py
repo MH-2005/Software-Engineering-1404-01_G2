@@ -71,14 +71,13 @@ class Trip(models.Model):
     ]
 
     trip_id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
+    trip_id = models.BigAutoField(primary_key=True)
+    # Changed from ForeignKey to CharField because Users live in Core DB (UUID)
+    user_id = models.CharField(
+        max_length=36,
         null=True,
         blank=True,
-        related_name='team11_trips',
-        db_column='user_id',
-        db_constraint=False,  # Users live in core DB, not microservice DB
+        db_index=True
     )
     copied_from_trip = models.ForeignKey(
         'self',
@@ -127,7 +126,7 @@ class Trip(models.Model):
         app_label = 'data'
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user_id', '-created_at']),
             models.Index(fields=['province']),
             models.Index(fields=['city']),
             models.Index(fields=['status']),
@@ -412,12 +411,12 @@ class UserMedia(models.Model):
         related_name='media',
         db_column='trip_id'
     )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='team11_media',
-        db_column='user_id',
-        db_constraint=False,  # Users live in core DB, not microservice DB
+    # Changed from ForeignKey to CharField because Users live in Core DB (UUID)
+    user_id = models.CharField(
+        max_length=36,
+        db_index=True,
+        null=True,
+        blank=True
     )
     media_url = models.URLField(max_length=500)
     caption = models.CharField(max_length=500, blank=True)
@@ -431,7 +430,7 @@ class UserMedia(models.Model):
         ordering = ['-uploaded_at']
         indexes = [
             models.Index(fields=['trip', '-uploaded_at']),
-            models.Index(fields=['user', '-uploaded_at']),
+            models.Index(fields=['user_id', '-uploaded_at']),
         ]
 
     def __str__(self):

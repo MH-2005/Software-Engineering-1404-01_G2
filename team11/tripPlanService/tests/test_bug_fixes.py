@@ -47,7 +47,7 @@ class BaseTestCase(TestCase):
 
         # Create a sample trip
         self.trip = Trip.objects.create(
-            user=self.user1,
+            user_id=str(self.user1.id),
             title='سفر اصفهان',
             province='اصفهان',
             city='اصفهان',
@@ -291,7 +291,7 @@ class TestBug8OwnershipChecks(BaseTestCase):
     def test_check_ownership_guest_trip_allowed(self):
         """Guest trip (no user) should allow anyone."""
         guest_trip = Trip.objects.create(
-            user=None,
+            user_id=None,
             title='Guest Trip',
             province='تبریز',
             start_date=date(2026, 6, 1),
@@ -355,7 +355,7 @@ class TestBug8OwnershipChecks(BaseTestCase):
         """DELETE by owner should succeed (204)."""
         # Create a separate trip to delete
         trip_to_delete = Trip.objects.create(
-            user=self.user1,
+            user_id=str(self.user1.id),
             title='Trip to Delete',
             province='مشهد',
             start_date=date(2026, 4, 1),
@@ -515,10 +515,10 @@ class TestBug9JWTUserId(BaseTestCase):
         # not with user id 9999 (from request body)
         if mock_gen.generate.called:
             call_kwargs = mock_gen.generate.call_args
-            user_arg = call_kwargs[1].get('user') if call_kwargs[1] else call_kwargs[0][0]
-            # user should be self.user1, not a user with id 9999
+            user_arg = call_kwargs[1].get('user_id') if call_kwargs[1] else call_kwargs[0][0]
+            # user should be self.user1.id as string
             if user_arg is not None:
-                self.assertEqual(user_arg.id, self.user1.id)
+                self.assertEqual(str(user_arg), str(self.user1.id))
 
     @patch('presentation.views.TripGenerator')
     def test_generate_trip_no_jwt_creates_guest_trip(self, MockGenerator):
@@ -546,7 +546,7 @@ class TestBug9JWTUserId(BaseTestCase):
 
         if mock_gen.generate.called:
             call_kwargs = mock_gen.generate.call_args
-            user_arg = call_kwargs[1].get('user') if call_kwargs[1] else call_kwargs[0][0]
+            user_arg = call_kwargs[1].get('user_id') if call_kwargs[1] else call_kwargs[0][0]
             self.assertIsNone(user_arg)
 
 

@@ -250,8 +250,19 @@ const FinalizeTrip: React.FC = () => {
             onConfirm: async () => {
                 setIsDialogLoading(true);
                 try {
-                    // Here you can add any final save logic
-                    // For now, we'll just show a success message
+                    // Claim the trip to ensure it's linked to the authenticated user
+                    if (tripId) {
+                        try {
+                            await tripApi.claim(tripId);
+                        } catch (claimErr: any) {
+                            // If strictly already claimed by self, ignore. 
+                            // API returns 200 with success:False if already claimed by self,
+                            // so usually it lands in try block.
+                            // If it fails with 400 (claimed by other), it lands here.
+                            console.warn('Claim warning:', claimErr);
+                        }
+                    }
+
                     success('برنامه سفر با موفقیت ذخیره شد');
 
                     // Optionally download PDF

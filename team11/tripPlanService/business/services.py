@@ -18,7 +18,7 @@ class TripService:
     """Business logic for Trip operations"""
 
     @staticmethod
-    def get_all_trips(user_id: Optional[int] = None, status: Optional[str] = None) -> List[Trip]:
+    def get_all_trips(user_id: Optional[str] = None, status: Optional[str] = None) -> List[Trip]:
         """Get all trips with optional filters"""
         return list(TripRepository.get_all(user_id, status))
 
@@ -28,7 +28,7 @@ class TripService:
         return TripRepository.get_by_id(trip_id)
 
     @staticmethod
-    def create_trip(user_id: Optional[int], data: Dict[str, Any]) -> Trip:
+    def create_trip(user_id: Optional[str], data: Dict[str, Any]) -> Trip:
         """Create a new trip with validation"""
         if not data.get('title'):
             raise ValueError("Trip title is required")
@@ -60,7 +60,7 @@ class TripService:
         return TripRepository.delete(trip_id)
 
     @staticmethod
-    def copy_trip(trip_id: int, user_id: Optional[int] = None) -> Optional[Trip]:
+    def copy_trip(trip_id: int, user_id: Optional[str] = None) -> Optional[Trip]:
         """Create a deep copy of an existing trip (including days and items)"""
         original = TripRepository.get_by_id(trip_id)
         if not original:
