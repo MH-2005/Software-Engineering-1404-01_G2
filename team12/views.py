@@ -2,9 +2,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from core.auth import api_login_required
 from django.utils.decorators import method_decorator
+import requests
 
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.views.decorators.http import require_http_methods
 from django.conf import settings
 from .models import Place
@@ -14,6 +14,8 @@ import json
 
 TEAM_NAME = "team12"
 CORE_BASE = settings.CORE_BASE_URL.rstrip('/')   # http://core:8000
+WIKI_SERVICE_URL = "http://wiki-service:8000/api/place-info/"
+MEDIA_SERVICE_URL = "http://media-service:8000/api/stats/"
 
 
 @api_login_required
@@ -23,6 +25,21 @@ def ping(request):
 
 def base(request):
     return render(request, f"{TEAM_NAME}/index.html")
+
+def fetch_external_data(self, place_id):
+    context = {"wiki": {}, "media": {}}
+    try:
+        wiki_res = requests.get(f"{WIKI_SERVICE_URL}?place_id={place_id}", timeout=2)
+        if wiki_res.status_code == 200:
+            context["wiki"] = wiki_res.json()
+
+        media_res = requests.get(f"{MEDIA_SERVICE_URL}?place_id={place_id}", timeout=2)
+        if media_res.status_code == 200:
+            context["media"] = media_res.json()
+    except Exception as e:
+        print(f"Error fetching from external services: {e}")
+    
+    return context
 
 @method_decorator(api_login_required, name='dispatch')
 class RecommendAPIView(APIView):
@@ -37,12 +54,12 @@ class RecommendAPIView(APIView):
         elif url_name == "recommend-places-in-region":
             return self.handle_places_in_region(data)
         
-        return Response({"error": "Invalid Endpoint"}, status=404)
+        return JsonResponse({"error": "Invalid Endpoint"}, status=404)
 
     def handle_recommend_places(self, data):
         required = ["candidate_place", "Travel_style", "Budget_level", "Trip_duration"]
         if not all(k in data for k in required):
-            return Response({"error": "Missing fields for place recommendation"}, status=400)
+            return JsonResponse({"error": "Missing fields for place recommendation"}, status=400)
             
         user_style = data.get('Travel_style')
         user_budget = data.get('Budget_level')

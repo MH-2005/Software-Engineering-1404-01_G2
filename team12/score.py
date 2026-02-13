@@ -1,4 +1,3 @@
-from .models import Place
 from math import tanh
 
 ### 0:Single, 1:Couple, 2:Family, 3:Business, 4:Friends
