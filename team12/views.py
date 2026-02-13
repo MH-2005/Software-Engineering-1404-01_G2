@@ -11,10 +11,8 @@ from .score import *
 import json
 from django.views.decorators.csrf import csrf_exempt
 
-
-
 TEAM_NAME = "team12"
-CORE_BASE = settings.CORE_BASE_URL.rstrip('/')   # http://core:8000
+CORE_BASE = settings.CORE_BASE_URL.rstrip('/')
 
 
 @api_login_required
@@ -22,12 +20,14 @@ CORE_BASE = settings.CORE_BASE_URL.rstrip('/')   # http://core:8000
 def ping(request):
     return JsonResponse({"team": TEAM_NAME, "ok": True})
 
+
 def base(request):
     return render(request, f"{TEAM_NAME}/index.html")
 
 
 def error_response(message, code="INVALID_PARAMETER", status=400):
     return JsonResponse({"error": {"code": code, "message": message}}, status=status)
+
 
 @method_decorator(api_login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
@@ -38,14 +38,12 @@ class ScoreCandidatePlacesView(APIView):
         except json.JSONDecodeError:
             return error_response("Invalid JSON format", "PARSE_ERROR")
 
-        # 1. Extract (No strict check yet)
-        candidate_ids = data.get('candidate_place', [])
+        candidate_ids = data.get('candidate_place_ids', [])
         style = data.get('travel_style')
         budget = data.get('budget_level')
         season = data.get('season')
-        duration = data.get('trip_duration')
+        duration = data.get('trip_duration_days')
 
-        # candidate_place is usually mandatory for this specific endpoint
         if not candidate_ids:
             return JsonResponse({"scored_places": []})
 
@@ -56,40 +54,34 @@ class ScoreCandidatePlacesView(APIView):
         score_map = {p.place_id: 1.0 for p in places}
         applied_any = False
 
-        # 2. Flexible Scoring (Skip if empty string or None)
-        
-        # --- TRAVEL STYLE ---
-        if style: 
+        if style:
             style = str(style).upper()
             if style not in styleIndex:
                 return error_response(f"Invalid travel_style: {style}. Options: {list(styleIndex.keys())}")
-            
+
             applied_any = True
             for p_id, val in scoreByStyle(places, style):
                 score_map[p_id] *= val
 
-        # --- BUDGET LEVEL ---
         if budget:
             budget = str(budget).upper()
             if budget not in budgetIndex:
                 return error_response(f"Invalid budget_level: {budget}. Options: {list(budgetIndex.keys())}")
-            
+
             applied_any = True
             for p_id, val in scoreByBudget(places, budget):
                 score_map[p_id] *= val
 
-        # --- SEASON ---
         if season:
             season = str(season).upper()
             if season not in seasonIndex:
                 return error_response(f"Invalid season: {season}. Options: {list(seasonIndex.keys())}")
-            
+
             applied_any = True
             for p_id, val in scoreBySeason(places, season):
                 score_map[p_id] *= val
 
-        # --- DURATION ---
-        if duration: # Handles string "5", int 5. Skips "" or None or 0
+        if duration:
             try:
                 dur_val = float(duration)
                 if dur_val > 0:
@@ -97,14 +89,12 @@ class ScoreCandidatePlacesView(APIView):
                     for p_id, val in scoreByDuration(places, dur_val):
                         score_map[p_id] *= val
                 else:
-                    return error_response("trip_duration must be positive")
+                    return error_response("trip_duration_days must be positive")
             except (ValueError, TypeError):
-                return error_response("trip_duration must be a number")
+                return error_response("trip_duration_days must be a number")
 
-        # 3. Final Response
         scored_places = []
         for p_id, total in score_map.items():
-            # If no filters applied, return 1.0 (neutral)
             final_val = total if applied_any else 1.0
             scored_places.append({
                 "place_id": p_id,
@@ -122,7 +112,7 @@ class SuggestRegionsView(APIView):
         season = request.GET.get('season')
         budget = request.GET.get('budget_level')
         limit_param = request.GET.get('limit', 10)
-        
+
         try:
             limit = int(limit_param)
         except ValueError:
@@ -130,13 +120,12 @@ class SuggestRegionsView(APIView):
 
         regions = Region.objects.all()
         destinations = []
-        
-        # Validations (Only if fields are present)
+
         if season:
             season = season.upper()
             if season not in seasonIndex:
                 return error_response("Invalid season")
-                
+
         if budget:
             budget = budget.upper()
             if budget not in budgetIndex:
@@ -145,12 +134,10 @@ class SuggestRegionsView(APIView):
         for region in regions:
             places = region.places.all()
             if not places.exists(): continue
-            
-            # Start score at 1.0
+
             region_score = 1.0
             applied_any = False
 
-            # --- Score by Season (Average of all places) ---
             if season:
                 applied_any = True
                 total_s = 0
@@ -160,7 +147,6 @@ class SuggestRegionsView(APIView):
                     total_s += seasonMtx[target_s_idx][p_s_idx]
                 region_score *= (total_s / places.count())
 
-            # --- Score by Budget (Average of all places) ---
             if budget:
                 applied_any = True
                 total_b = 0
@@ -170,7 +156,6 @@ class SuggestRegionsView(APIView):
                     total_b += budgetMtx[target_b_idx][p_b_idx]
                 region_score *= (total_b / places.count())
 
-            # Only add to results if we actually calculated something (or return all if you prefer)
             if applied_any:
                 destinations.append({
                     "region_id": region.region_id,
@@ -180,20 +165,18 @@ class SuggestRegionsView(APIView):
                 })
 
         destinations.sort(key=lambda x: x['match_score'], reverse=True)
-        
-        # If no filters were provided, implies return nothing or return all (empty list is safer for strict logic)
+
         return JsonResponse({"destinations": destinations[:limit]})
 
 
 @method_decorator(api_login_required, name='dispatch')
 class SuggestPlacesInRegionView(APIView):
     def get(self, request, region_id):
-        # Extract params
         style = request.GET.get('travel_style')
         budget = request.GET.get('budget_level')
         season = request.GET.get('season')
-        duration = request.GET.get('trip_duration')
-        
+        duration = request.GET.get('trip_duration_days')
+
         try:
             limit = int(request.GET.get('limit', 10))
         except ValueError:
@@ -201,18 +184,16 @@ class SuggestPlacesInRegionView(APIView):
 
         places = Place.objects.filter(region__region_id=region_id)
         if not places.exists():
-            # If region invalid or empty, return 404 or empty list
             return error_response("Region not found", "NOT_FOUND", status=404)
 
         score_map = {p.place_id: 1.0 for p in places}
         applied_any = False
 
-        # --- Reusing Flexible Logic ---
         if style:
             applied_any = True
             if style.upper() in styleIndex:
                 for p_id, val in scoreByStyle(places, style.upper()): score_map[p_id] *= val
-        
+
         if budget:
             applied_any = True
             if budget.upper() in budgetIndex:
@@ -229,7 +210,8 @@ class SuggestPlacesInRegionView(APIView):
                 if d_val > 0:
                     applied_any = True
                     for p_id, val in scoreByDuration(places, d_val): score_map[p_id] *= val
-            except: pass # Ignore bad duration if filtering loosely
+            except:
+                pass
 
         scored_places = []
         for p_id, total in score_map.items():
