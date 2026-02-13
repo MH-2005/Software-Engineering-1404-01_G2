@@ -7,7 +7,7 @@ urlpatterns = [
     path("", views.base, name="base"),
     path("ping/", views.ping, name="ping"),
 
-    path("api/recommend-places/", views.RecommendAPIView.as_view(), name="recommend-places"),
-    path("api/recommend-regions/", views.RecommendAPIView.as_view(), name="recommend-regions"),
-    path("api/recommend-places-in-region/", views.RecommendAPIView.as_view(), name="recommend-places-in-region"),
+    path("api/recommend-places/", views.ScoreCandidatePlacesView.as_view(), name="recommend-places"),
+    path("api/recommend-regions/", views.SuggestRegionsView.as_view(), name="recommend-regions"),
+    path("api/recommend-places-in-region/", views.SuggestPlacesInRegionView.as_view(), name="recommend-places-in-region"),
 ]
