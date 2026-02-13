@@ -6,3 +6,5 @@ mysqlclient
 PyMySQL
 gunicorn
 whitenoise
+google-generativeai
+requests
