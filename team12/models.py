@@ -29,6 +29,8 @@ class Place(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='places', null=True)
     image_url = models.URLField(blank=True, null=True)
 
+    ai_reason = models.TextField(blank=True, null=True)
+
     def __str__(self):
         return self.place_name
 
