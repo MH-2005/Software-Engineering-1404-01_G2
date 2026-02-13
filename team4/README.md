@@ -1,35 +1,35 @@
 # Team 4 - Facilities & Transportation Service
 
-سرویس مدیریت امکانات (هتل، رستوران، بیمارستان) و خدمات حمل‌ونقل
+Facility management service (hotels, restaurants, hospitals, pharmacies, clinics, museums, shopping centers) and transportation services.
 
-## 📋 مراحل راه‌اندازی
+## 📋 Setup Instructions
 
-### 1. نصب Dependencies
+### 1. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
-pip install mysqlclient  # برای MySQL
+pip install mysqlclient  # For MySQL
 ```
 
-### 2. تنظیمات Database
+### 2. Database Configuration
 
-**الف) ساخت Database در MySQL:**
+**a) Create Database in MySQL:**
 
 ```sql
 CREATE DATABASE IF NOT EXISTS team4_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-**ب) تنظیم فایل `.env`:**
+**b) Configure `.env` File:**
 
-در فایل `.env` در root پروژه این خط را اضافه کنید:
+Add this line to the `.env` file in the project root:
 
 ```env
 TEAM4_DATABASE_URL=mysql://root:YOUR_MYSQL_PASSWORD@localhost:3306/team4_db
 ```
 
-### 3. تنظیمات Django
+### 3. Django Configuration
 
-مطمئن شوید `team4` در `INSTALLED_APPS` اضافه شده:
+Ensure `team4` is added to `INSTALLED_APPS`:
 
 ```python
 # app404/settings.py
@@ -48,22 +48,22 @@ python manage.py makemigrations team4
 python manage.py migrate --database=team4
 ```
 
-### 5. بارگذاری داده‌های اولیه
+### 5. Load Initial Data
 
 ```bash
 python manage.py loaddata team4/fixtures/provinces.json --database=team4
-python -m team4.load_cities  # Cities با Python script
+python -m team4.load_cities  # Cities via Python script
 python manage.py loaddata team4/fixtures/categories.json --database=team4
 python manage.py loaddata team4/fixtures/amenities.json --database=team4
 ```
 
-### 5. ایجاد Superuser
+### 6. Create Superuser
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 6. اجرای سرور
+### 7. Run Development Server
 
 ```bash
 python manage.py runserver
@@ -73,55 +73,55 @@ python manage.py runserver
 
 ## 🔌 API Endpoints
 
-### امکانات (Facilities)
+### Facilities
 
-#### 1. لیست امکانات با جستجو و فیلتر
+#### 1. List Facilities with Search and Filters
 ```http
 GET /team4/api/facilities/
 
 Query Parameters:
-- city: نام شهر (مثال: شیراز)
-- category: نام دسته‌بندی (مثال: هتل)
-- min_price: حداقل قیمت
-- max_price: حداکثر قیمت
-- min_rating: حداقل امتیاز (1-5)
-- amenities: لیست amenity_id (کاما-separated، مثال: 1,2,5)
-- is_24_hour: فیلتر 24 ساعته (true/false)
-- sort: نوع مرتب‌سازی (distance|rating|review_count)
-- page: شماره صفحه
-- page_size: تعداد در هر صفحه (پیش‌فرض: 10)
+- city: City name (example: Tehran)
+- category: Category name (example: Hotel)
+- min_price: Minimum price
+- max_price: Maximum price
+- min_rating: Minimum rating (1-5)
+- amenities: List of amenity_id (comma-separated, example: 1,2,5)
+- is_24_hour: Filter 24-hour facilities (true/false)
+- sort: Sort type (distance|rating|review_count)
+- page: Page number
+- page_size: Items per page (default: 10)
 ```
 
-**مثال:**
+**Example:**
 ```bash
-curl "http://localhost:8000/team4/api/facilities/?city=شیراز&category=هتل&min_rating=4&sort=rating"
+curl "http://localhost:8000/team4/api/facilities/?city=Tehran&category=Hotel&min_rating=4&sort=rating"
 ```
 
-#### 2. جزئیات یک مکان
+#### 2. Facility Details
 ```http
 GET /team4/api/facilities/{fac_id}/
 ```
 
-**مثال:**
+**Example:**
 ```bash
 curl "http://localhost:8000/team4/api/facilities/1/"
 ```
 
-#### 3. امکانات نزدیک
+#### 3. Nearby Facilities
 ```http
 GET /team4/api/facilities/{fac_id}/nearby/
 
 Query Parameters:
-- radius: شعاع جستجو (km، پیش‌فرض: 5)
-- category: فیلتر دسته‌بندی (اختیاری)
+- radius: Search radius (km, default: 5)
+- category: Category filter (optional)
 ```
 
-**مثال:**
+**Example:**
 ```bash
-curl "http://localhost:8000/team4/api/facilities/1/nearby/?radius=5&category=رستوران"
+curl "http://localhost:8000/team4/api/facilities/1/nearby/?radius=5&category=Restaurant"
 ```
 
-#### 4. مقایسه هتل‌ها
+#### 4. Compare Hotels
 ```http
 POST /team4/api/facilities/compare/
 
@@ -131,7 +131,7 @@ Body (JSON):
 }
 ```
 
-**مثال:**
+**Example:**
 ```bash
 curl -X POST "http://localhost:8000/team4/api/facilities/compare/" \
   -H "Content-Type: application/json" \
@@ -140,59 +140,192 @@ curl -X POST "http://localhost:8000/team4/api/facilities/compare/" \
 
 ---
 
-### دسته‌بندی‌ها (Categories)
+### Categories
 
 ```http
 GET /team4/api/categories/
 GET /team4/api/categories/{id}/
 ```
 
+**Available Categories:**
+- Hotels
+- Restaurants
+- Hospitals
+- Shopping Centers
+- Museums
+- Cafes
+- Pharmacies
+- Clinics
+
 ---
 
-### شهرها (Cities)
+### Region Search
 
 ```http
-GET /team4/api/cities/
-GET /team4/api/cities/{id}/
+GET /team4/api/regions/search/
 
 Query Parameters:
-- province: فیلتر بر اساس نام استان
+- query: Search query (required)
+- region_type: Filter by type - 'province', 'city', or 'village' (optional)
 ```
 
-**مثال:**
+**Example:**
 ```bash
-curl "http://localhost:8000/team4/api/cities/?province=فارس"
+curl "http://localhost:8000/team4/api/regions/search/?query=Tehran"
 ```
 
 ---
 
-### امکانات (Amenities)
+### Favorites
+
+#### 1. List User Favorites
+```http
+GET /team4/api/favorites/
+```
+
+#### 2. Add to Favorites
+```http
+POST /team4/api/favorites/?facility={facility_id}
+```
+
+#### 3. Toggle Favorite Status
+```http
+POST /team4/api/favorites/toggle/
+
+Body (JSON):
+{
+  "facility": 123
+}
+```
+
+#### 4. Check if Favorited
+```http
+GET /team4/api/favorites/check/?facility={facility_id}
+```
+
+#### 5. Remove from Favorites
+```http
+DELETE /team4/api/favorites/{favorite_id}/
+```
+
+---
+
+### Reviews
+
+#### 1. List Reviews
+```http
+GET /team4/api/reviews/
+
+Query Parameters:
+- facility: Filter by facility ID
+- min_rating: Minimum rating filter
+```
+
+#### 2. Create Review
+```http
+POST /team4/api/reviews/
+
+Body (JSON):
+{
+  "facility": 123,
+  "rating": 5,
+  "comment": "Excellent service!"
+}
+```
+
+#### 3. Update Review
+```http
+PUT /team4/api/reviews/{review_id}/
+PATCH /team4/api/reviews/{review_id}/
+```
+
+#### 4. Delete Review
+```http
+DELETE /team4/api/reviews/{review_id}/
+```
+
+---
+
+### Routing & Navigation
 
 ```http
-GET /team4/api/amenities/
-GET /team4/api/amenities/{id}/
+POST /team4/api/routing/
+
+Body (JSON):
+{
+  "type": "car",
+  "origin": {
+    "latitude": 35.7219,
+    "longitude": 51.3347
+  },
+  "destination": {
+    "latitude": 35.6892,
+    "longitude": 51.3890
+  },
+  "avoidTrafficZone": false,
+  "avoidOddEvenZone": false,
+  "alternative": false
+}
+```
+
+**Vehicle Types:**
+- `car`: Automobile
+- `motorcycle`: Motorcycle
+
+---
+
+## 🔐 Authentication
+
+Most endpoints require authentication. The API uses JWT tokens stored in HttpOnly cookies.
+
+**Login:**
+```http
+POST /team4/login/
+
+Body (JSON):
+{
+  "username": "your_username",
+  "password": "your_password"
+}
+```
+
+**Register:**
+```http
+POST /team4/register/
+
+Body (JSON):
+{
+  "username": "new_user",
+  "password": "secure_password",
+  "email": "user@example.com"
+}
+```
+
+**Logout:**
+```http
+POST /team4/logout/
 ```
 
 ---
 
-## 🧪 اجرای تست‌ها
+## 🧪 Running Tests
 
-### تست همه Models و Services
+### Test All Models and Services
 ```bash
 python manage.py test team4
 ```
 
-### تست فقط Models
+### Test Models Only
 ```bash
 python manage.py test team4.tests.test_models
 ```
 
-### تست فقط Services
+### Test Services Only
 ```bash
 python manage.py test team4.tests.test_services
 ```
 
-### تست با Coverage
+### Test with Coverage
 ```bash
 pip install coverage
 coverage run --source='team4' manage.py test team4
@@ -202,79 +335,142 @@ coverage html
 
 ---
 
-## 📊 مدیریت از Django Admin
+## 📊 Django Admin Panel
 
-دسترسی به پنل ادمین:
+Access the admin panel at:
 ```
 http://localhost:8000/admin/
 ```
 
-می‌توانید موارد زیر را مدیریت کنید:
-- استان‌ها و شهرها
-- دسته‌بندی‌ها
-- امکانات (Amenities)
-- مکان‌ها (Facilities)
-- قیمت‌ها
-- تصاویر
+You can manage:
+- Provinces and Cities
+- Categories
+- Amenities
+- Facilities
+- Prices
+- Images
+- Reviews
+- Favorites
 
 ---
 
-## 📁 ساختار فایل‌ها
+## 🎨 Frontend Development
+
+### Build Frontend
+```bash
+cd team4/front
+npm install
+npm run build
+```
+
+The build process automatically copies the compiled assets to Django's static and template directories.
+
+### Development Mode
+```bash
+cd team4/front
+npm run dev
+```
+
+### Frontend Structure
+```
+team4/front/
+├── src/
+│   ├── components/       # React components
+│   ├── services/         # API service layer
+│   ├── utils/            # Utility functions
+│   ├── data/             # Mock data and types
+│   └── config/           # Configuration files
+├── static/               # Built assets
+└── templates/            # Django templates
+```
+
+---
+
+## 📁 Project Structure
 
 ```
 team4/
-├── models.py              # 8 Model
-├── serializers.py         # 8 Serializer
-├── views.py               # 4 ViewSet
+├── models.py              # 8 Models
+├── serializers.py         # Serializers (cleaned, no Swagger decorators)
+├── views.py               # ViewSets (cleaned, no Swagger decorators)
 ├── urls.py                # URL Routing
-├── admin.py               # Django Admin
+├── admin.py               # Django Admin Configuration
+├── auth.py                # Authentication views
 ├── services/
 │   ├── __init__.py
-│   └── facility_service.py
-├── fixtures/              # داده‌های اولیه
+│   ├── facility_service.py
+│   └── region_service.py
+├── fixtures/              # Initial data
 │   ├── provinces.json
 │   ├── cities.json
 │   ├── categories.json
-│   ├── amenities.json
-│   └── sample_facilities.json
+│   └── amenities.json
 ├── tests/
 │   ├── __init__.py
 │   ├── test_models.py
 │   └── test_services.py
+├── front/                 # React + TypeScript frontend
+│   ├── src/
+│   ├── public/
+│   └── package.json
+├── static/                # Django static files
+├── templates/             # Django templates
 └── README.md
 ```
 
 ---
 
-## ✅ Checklist تکمیل شده
+## ✅ Implementation Checklist
 
-- ✅ Models (8 جدول)
+- ✅ Models (8 tables with proper relationships)
 - ✅ Migrations
-- ✅ Services (Business Logic)
-- ✅ Serializers (8 Serializer)
-- ✅ ViewSets (4 ViewSet با 9 API)
-- ✅ URLs
-- ✅ Django Admin
-- ✅ Fixtures (داده‌های اولیه)
+- ✅ Services (Business Logic layer)
+- ✅ Serializers (8 Serializers, cleaned from Swagger decorators)
+- ✅ ViewSets (API endpoints, cleaned from Swagger decorators)
+- ✅ URLs (RESTful routing)
+- ✅ Django Admin (Full management interface)
+- ✅ Fixtures (Initial seed data)
 - ✅ Tests (Models + Services)
+- ✅ Authentication (JWT with HttpOnly cookies)
+- ✅ Frontend (React + TypeScript + Vite)
+- ✅ API Integration (Neshan Maps integration)
 - ✅ Documentation
 
 ---
 
-## 🚀 مراحل بعدی
+## 🚀 Next Steps
 
-1. **تست APIs با Postman/Thunder Client**
-2. **اضافه کردن داده‌های بیشتر از طریق Admin**
-3. **پیاده‌سازی Frontend توسط نفر 4**
-4. **یکپارچگی با Neshan API (نفر 2)**
-5. **یکپارچگی با سایر سرویس‌ها (Map, Trip Plan)**
+1. **Test APIs with Postman/Thunder Client**
+2. **Add more data through Django Admin**
+3. **Frontend deployment optimization**
+4. **Integration with other team services**
+5. **Performance optimization and caching**
 
 ---
 
-## 📞 تماس
+## 📝 Important Notes
 
-**تیم 4 - Facilities & Transportation**
-- Backend Core: شما (نفر 1) ✅
-- Services & Integration: نفر 2
-- APIs & ViewSets: نفر 3
-- Frontend: نفر 4
+- All Swagger/drf_spectacular decorators have been removed from the codebase
+- Authentication uses HttpOnly cookies for security
+- All fetch requests include `credentials: 'include'` for cookie handling
+- Frontend build automatically syncs with Django templates
+- Categories updated to match project requirements:
+  - Hotels (هتل)
+  - Restaurants (رستوران)
+  - Hospitals (بیمارستان)
+  - Shopping Centers (مرکز خرید)
+  - Museums (موزه)
+  - Cafes (کافه)
+  - Pharmacies (داروخانه)
+  - Clinics (درمانگاه)
+
+---
+
+## 📞 Team Contact
+
+**Team 4 - Facilities & Transportation**
+- Backend Core: Developer 1 ✅
+- Services & Integration: Developer 2
+- APIs & ViewSets: Developer 3
+- Frontend: Developer 4
+
