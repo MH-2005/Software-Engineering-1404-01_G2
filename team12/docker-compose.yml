@@ -10,20 +10,10 @@ services:
     networks:
       - app404
     depends_on:
-      - frontend
       - backend
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    networks:
-      - app404
-
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: .
     env_file:
       - .env
     environment:
@@ -46,6 +36,11 @@ services:
       POSTGRES_PASSWORD: ${TEAM12_POSTGRES_PASSWORD:-team12_pass}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TEAM8_POSTGRES_USER} -d ${TEAM8_POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
     networks:
       - app404
 

@@ -30,21 +30,6 @@ def base(request):
 def error_response(message, code="INVALID_PARAMETER", status=400):
     return JsonResponse({"error": {"code": code, "message": message}}, status=status)
 
-def fetch_external_data(self, place_id):
-    context = {"wiki": {}, "media": {}}
-    try:
-        wiki_res = requests.get(f"{WIKI_SERVICE_URL}?place_id={place_id}", timeout=2)
-        if wiki_res.status_code == 200:
-            context["wiki"] = wiki_res.json()
-
-        media_res = requests.get(f"{MEDIA_SERVICE_URL}?place_id={place_id}", timeout=2)
-        if media_res.status_code == 200:
-            context["media"] = media_res.json()
-    except Exception as e:
-        print(f"Error fetching from external services: {e}")
-    
-    return context
-
 @method_decorator(api_login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class ScoreCandidatePlacesView(APIView):
@@ -63,7 +48,7 @@ class ScoreCandidatePlacesView(APIView):
         if not candidate_ids:
             return JsonResponse({"scored_places": []})
 
-        places = get_or_enrich_places(candidate_place_ids)
+        places = get_or_enrich_places(candidate_ids)
         if not places.exists():
             return JsonResponse({"scored_places": []})
 
