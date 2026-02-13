@@ -96,7 +96,7 @@ class RecommendationClient:
                 'image_url': 'https://example.com/mashhad.jpg',
                 'best_seasons': ['بهار', 'پاییز'],
                 'budget_suitability': ['ECONOMY', 'MEDIUM', 'LUXURY'],
-                'base_score': 92
+                'base_score': 94  # Increased from 92 for religious significance
             },
             {
                 'region_id': 'reg_kerman',
@@ -432,19 +432,33 @@ class RecommendationClient:
     def get_suggested_regions(
             self,
             budget_limit: str,
-            season: str
+            season: str,
+            interests: List[str] = None
     ) -> List[Dict]:
         """
-        API 2: Suggest regions based on budget and season
+        API 2: Suggest regions based on budget, season, and interests
 
         Args:
             budget_limit: ECONOMY, MEDIUM, LUXURY, UNLIMITED
             season: بهار, تابستان, پاییز, زمستان
+            interests: List of Persian interest keywords (optional)
 
         Returns:
             List of regions with match scores
         """
-        logger.info(f"Suggesting regions for {season} season with {budget_limit} budget")
+        logger.info(f"Suggesting regions for {season} season with {budget_limit} budget and interests: {interests}")
+
+        # Interest to province mapping for variety (ordered by relevance)
+        interest_province_boost = {
+            'تاریخی': ['اصفهان', 'فارس', 'کرمانشاه', 'یزد', 'خوزستان'],
+            'فرهنگی': ['یزد', 'فارس', 'آذربایجان شرقی', 'اصفهان', 'تهران'],
+            'طبیعت': ['گیلان', 'مازندران', 'کردستان', 'کهگیلویه و بویراحمد', 'لرستان'],
+            'خانوادگی': ['مازندران', 'گیلان', 'البرز', 'فارس', 'کرمان'],
+            'مذهبی': ['خراسان رضوی', 'قم', 'فارس', 'کرمانشاه', 'همدان'],
+            'ماجراجویی': ['اردبیل', 'البرز', 'لرستان', 'کهگیلویه و بویراحمد', 'کرمان'],
+            'شهری': ['تهران', 'آذربایجان شرقی', 'فارس', 'اصفهان', 'خراسان رضوی'],
+            'غذا': ['گیلان', 'آذربایجان شرقی', 'مازندران', 'اصفهان', 'فارس']
+        }
 
         suggested_regions = []
 
@@ -453,27 +467,45 @@ class RecommendationClient:
             if budget_limit not in region['budget_suitability'] and budget_limit != 'UNLIMITED':
                 continue
 
-            # Calculate match score
-            match_score = region['base_score']
+            # Start with a lower base to make interest boosts more impactful
+            match_score = region['base_score'] * 0.7  # Reduce base score impact
 
             # Season bonus
             if season in region['best_seasons']:
-                match_score += 10
+                match_score += 15
 
             # Budget exact match bonus
             if budget_limit in region['budget_suitability']:
                 match_score += 5
+
+            # Interest-based boost (MUCH higher weight for matching interests)
+            if interests:
+                has_match = False
+                for interest in interests:
+                    if interest in interest_province_boost:
+                        preferred_provinces = interest_province_boost[interest]
+                        if region['province'] in preferred_provinces:
+                            # Very high boost for interest matches
+                            position = preferred_provinces.index(region['province'])
+                            interest_boost = 40 - (position * 4)  # 40, 36, 32, 28, 24
+                            match_score += interest_boost
+                            has_match = True
+
+                # Strong penalty for non-matching provinces when interests are specified
+                if not has_match:
+                    match_score -= 25
 
             suggested_regions.append({
                 'region_id': region['region_id'],
                 'region_name': region['region_name'],
                 'province': region['province'],
                 'description': region['description'],
-                'match_score': min(100, match_score),
-                'image_url': region['image_url']
+                'match_score': min(100, max(0, int(match_score))),  # Clamp between 0-100
+                'image_url': region['image_url'],
+                'best_seasons': region.get('best_seasons', [season])
             })
 
-        # Sort by match score
+        # Sort by match score with some randomization for variety
         suggested_regions.sort(key=lambda x: x['match_score'], reverse=True)
 
         # Return top 10

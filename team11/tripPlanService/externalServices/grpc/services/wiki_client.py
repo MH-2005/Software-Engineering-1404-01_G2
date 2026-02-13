@@ -2,7 +2,7 @@
 Wikipedia/Knowledge Base Client - Fully Mocked with Comprehensive Iranian Places Data
 """
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 logger = logging.getLogger(__name__)
 

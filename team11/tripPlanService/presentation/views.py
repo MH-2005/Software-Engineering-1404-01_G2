@@ -14,7 +14,7 @@ from datetime import date, datetime
 from business.services import (
     TripService, TripDayService, TripItemService,
     DependencyService, ShareService, VotingService,
-    ReviewService, MediaService
+    ReviewService, MediaService,SuggestionService
 )
 from business.generators import TripGenerator
 from business.helpers import AlternativesProvider
@@ -1270,9 +1270,6 @@ def suggest_destinations(request):
             }
         ]
     }
-
-    وابستگی:
-    - Wiki Service (محمدحسین): توضیحات و تصاویر شهرها
     """
 
     # 1. اعتبارسنجی ورودی
@@ -1290,10 +1287,20 @@ def suggest_destinations(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # اعتبارسنجی season
-    valid_seasons = ['spring', 'summer', 'fall', 'winter']
-    if season not in valid_seasons:
+    # Map English season to Persian
+    season_map = {
+        'spring': 'بهار',
+        'summer': 'تابستان',
+        'fall': 'پاییز',
+        'autumn': 'پاییز',
+        'winter': 'زمستان'
+    }
+
+    season_persian = season_map.get(season.lower(), 'بهار')
+    valid_seasons = ['spring', 'summer', 'fall', 'autumn', 'winter']
+    if season.lower() not in valid_seasons:
         season = 'spring'
+        season_persian = 'بهار'
 
     # اعتبارسنجی budget_level
     valid_budgets = ['ECONOMY', 'MEDIUM', 'LUXURY', 'UNLIMITED']
@@ -1313,8 +1320,8 @@ def suggest_destinations(request):
 
     try:
         # 2. پیشنهاد مقصدها بر اساس پارامترها
-        suggestions = _generate_destination_suggestions(
-            season=season,
+        suggestions = SuggestionService.generate_destination_suggestions(
+            season=season_persian,
             budget_level=budget_level,
             travel_style=travel_style,
             interests=interests
@@ -1343,177 +1350,6 @@ def suggest_destinations(request):
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-
-def _generate_destination_suggestions(
-        season: str,
-        budget_level: str,
-        travel_style: str,
-        interests: List[str]
-) -> List[Dict]:
-    """
-    منطق اصلی پیشنهاد مقصد
-
-    الگوریتم:
-    1. فیلتر شهرها بر اساس فصل مناسب
-    2. فیلتر بر اساس بودجه
-    3. امتیازدهی بر اساس interests
-    4. مرتب‌سازی بر اساس امتیاز
-    5. برگرداندن 3 تا برتر
-    """
-
-    # دیتابیس مقصدهای محبوب (در واقعیت از Facility/Wiki Service می‌آید)
-    destinations_db = [
-        {
-            "city": "اصفهان",
-            "province": "اصفهان",
-            "best_seasons": ["spring", "fall"],
-            "budget_min": "ECONOMY",
-            "categories": ["تاریخی", "فرهنگی", "معماری"],
-            "suitable_for": ["COUPLE", "FAMILY", "FRIENDS"],
-            "highlights": ["میدان نقش جهان", "سی‌وسه‌پل", "مسجد شیخ لطف‌الله"],
-            "description": "اصفهان نصف جهان با جاذبه‌های تاریخی بی‌نظیر و آب و هوای معتدل",
-            "estimated_cost_3days": {"ECONOMY": 1500000, "MEDIUM": 2500000, "LUXURY": 5000000},
-            "images": []
-        },
-        {
-            "city": "شیراز",
-            "province": "فارس",
-            "best_seasons": ["spring", "winter"],
-            "budget_min": "ECONOMY",
-            "categories": ["تاریخی", "فرهنگی", "باغ"],
-            "suitable_for": ["COUPLE", "FAMILY", "FRIENDS", "SOLO"],
-            "highlights": ["تخت جمشید", "حافظیه", "باغ ارم"],
-            "description": "شیراز شهر شعر و ادب و گل و بلبل با تاریخی کهن",
-            "estimated_cost_3days": {"ECONOMY": 1400000, "MEDIUM": 2300000, "LUXURY": 4500000},
-            "images": []
-        },
-        {
-            "city": "مشهد",
-            "province": "خراسان رضوی",
-            "best_seasons": ["spring", "summer", "fall"],
-            "budget_min": "ECONOMY",
-            "categories": ["مذهبی", "زیارتی", "فرهنگی"],
-            "suitable_for": ["FAMILY", "COUPLE", "FRIENDS"],
-            "highlights": ["حرم امام رضا", "بازار رضا", "موزه آستان قدس"],
-            "description": "مشهد شهر مقدس و پرزیارت با امکانات گردشگری عالی",
-            "estimated_cost_3days": {"ECONOMY": 1200000, "MEDIUM": 2000000, "LUXURY": 4000000},
-            "images": []
-        },
-        {
-            "city": "تهران",
-            "province": "تهران",
-            "best_seasons": ["spring", "fall"],
-            "budget_min": "MEDIUM",
-            "categories": ["شهری", "فرهنگی", "خرید"],
-            "suitable_for": ["BUSINESS", "SOLO", "FRIENDS"],
-            "highlights": ["برج میلاد", "کاخ گلستان", "بازار تهران"],
-            "description": "تهران پایتخت پرجنب‌وجوش با تنوع بالای امکانات",
-            "estimated_cost_3days": {"ECONOMY": 2000000, "MEDIUM": 3500000, "LUXURY": 7000000},
-            "images": []
-        },
-        {
-            "city": "رامسر",
-            "province": "مازندران",
-            "best_seasons": ["summer", "spring"],
-            "budget_min": "MEDIUM",
-            "categories": ["طبیعت", "ساحل", "خانوادگی"],
-            "suitable_for": ["FAMILY", "COUPLE"],
-            "highlights": ["جنگل‌های شمال", "ساحل خزر", "تله‌کابین"],
-            "description": "رامسر جزیره سبز ایران با طبیعت بکر و آب و هوای دلپذیر",
-            "estimated_cost_3days": {"ECONOMY": 1800000, "MEDIUM": 3000000, "LUXURY": 6000000},
-            "images": []
-        },
-        {
-            "city": "یزد",
-            "province": "یزد",
-            "best_seasons": ["spring", "fall", "winter"],
-            "budget_min": "ECONOMY",
-            "categories": ["تاریخی", "معماری", "کویری"],
-            "suitable_for": ["COUPLE", "FRIENDS", "SOLO"],
-            "highlights": ["شهر بادگیرها", "آتشکده", "باغ دولت‌آباد"],
-            "description": "یزد شهر کویری با معماری خاص و جاذبه‌های تاریخی منحصربه‌فرد",
-            "estimated_cost_3days": {"ECONOMY": 1300000, "MEDIUM": 2200000, "LUXURY": 4200000},
-            "images": []
-        }
-    ]
-
-    # امتیازدهی به هر مقصد
-    scored_destinations = []
-
-    for dest in destinations_db:
-        score = 0
-        reasons = []
-
-        # 1. فصل مناسب (+30)
-        if season in dest["best_seasons"]:
-            score += 30
-            season_names = {
-                "spring": "بهار",
-                "summer": "تابستان",
-                "fall": "پاییز",
-                "winter": "زمستان"
-            }
-            reasons.append(f"فصل {season_names[season]} برای این مقصد عالی است")
-
-        # 2. سبک سفر (+25)
-        if travel_style in dest["suitable_for"]:
-            score += 25
-            style_names = {
-                "SOLO": "تنها",
-                "COUPLE": "زوج",
-                "FAMILY": "خانوادگی",
-                "FRIENDS": "با دوستان",
-                "BUSINESS": "کاری"
-            }
-            reasons.append(f"مناسب برای سفر {style_names[travel_style]}")
-
-        # 3. تطبیق علایق (+15 برای هر تطبیق)
-        interest_matches = 0
-        for interest in interests:
-            if interest in dest["categories"]:
-                interest_matches += 1
-                score += 15
-
-        if interest_matches > 0:
-            reasons.append(f"دارای {interest_matches} جاذبه مورد علاقه شما")
-
-        # 4. بودجه (+20 اگر مناسب باشد)
-        budget_order = ["ECONOMY", "MEDIUM", "LUXURY", "UNLIMITED"]
-        dest_budget_idx = budget_order.index(dest["budget_min"])
-        user_budget_idx = budget_order.index(budget_level)
-
-        if user_budget_idx >= dest_budget_idx:
-            score += 20
-            reasons.append("در محدوده بودجه شما")
-        else:
-            score -= 30  # جریمه برای گران‌تر بودن
-
-        # 5. امتیاز پایه (+10)
-        score += 10
-
-        # ساخت نتیجه
-        if score > 0:  # فقط مقاصد با امتیاز مثبت
-            scored_destinations.append({
-                "city": dest["city"],
-                "province": dest["province"],
-                "score": score,
-                "reason": " | ".join(reasons[:2]),  # 2 دلیل اصلی
-                "highlights": dest["highlights"][:3],
-                "best_season": dest["best_seasons"][0],
-                "estimated_cost": str(dest["estimated_cost_3days"].get(budget_level, 0)),
-                "duration_days": 3,
-                "description": dest["description"],
-                "images": dest["images"],
-                "categories": dest["categories"]
-            })
-
-    # مرتب‌سازی بر اساس امتیاز
-    scored_destinations.sort(key=lambda x: x["score"], reverse=True)
-
-    # برگرداندن 3 مقصد برتر
-    return scored_destinations[:3]
-
 
 # =======================================================================================
 # API 4: محاسبه هزینه (Cost Calculation Service)
