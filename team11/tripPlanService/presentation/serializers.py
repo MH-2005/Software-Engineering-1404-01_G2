@@ -228,10 +228,10 @@ class TripDetailSerializer(serializers.ModelSerializer):
 class TripCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer for creating/updating trips with camelCase support"""
 
-    style = serializers.CharField(source='travel_style', required=False)
+    style = serializers.CharField(source='travel_style', required=False, allow_null=True)
     startDate = serializers.DateField(source='start_date', required=True)
     endDate = serializers.DateField(source='end_date', required=False)
-    budget_level = serializers.CharField(required=False)
+    budget_level = serializers.CharField(required=False, allow_null=True)
     density = serializers.CharField(required=False, allow_null=True)
     interests = serializers.ListField(
         child=serializers.CharField(),
@@ -263,6 +263,12 @@ class TripCreateUpdateSerializer(serializers.ModelSerializer):
             validated_data['duration_days'] = duration_days
         else:
             validated_data['duration_days'] = 3  # Default duration
+
+        # Set default values for required fields if None
+        if validated_data.get('travel_style') is None:
+            validated_data['travel_style'] = 'SOLO'
+        if validated_data.get('budget_level') is None:
+            validated_data['budget_level'] = 'MEDIUM'
 
         # Set default values
         validated_data.setdefault('daily_available_hours', 8)
