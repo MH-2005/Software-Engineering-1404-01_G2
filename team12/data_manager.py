@@ -51,32 +51,35 @@ def get_or_enrich_places(candidate_place_ids):
         ai_data = generate_ai_metadata_for_place(pid, summary, tags)
 
         try:
-            safe_duration = int(ai_data.get("duration", 2))
+            safe_duration = int(ai_data.get("duration", 2) or 2)
         except (ValueError, TypeError):
             safe_duration = 2
 
-        r_id = ai_data.get("region_id", "unknown")
-        r_name = ai_data.get("region_name", "نامشخص")
+        r_id = ai_data.get("region_id") or "unknown"
+        r_name = ai_data.get("region_name") or "نامشخص"
 
         region_obj, created = Region.objects.get_or_create(
             region_id=r_id,
             defaults={'region_name': r_name}
         )
 
+        raw_budget = ai_data.get("budget_level") or "MODERATE"
+        raw_style = ai_data.get("travel_style") or "FAMILY"
+        raw_season = ai_data.get("season") or "SPRING"
+
+        safe_season = raw_season.upper()
+        if safe_season == "AUTUMN":
+            safe_season = "FALL"
+
         new_place = Place(
             place_id=pid,
             place_name=place_name,
             region=region_obj,
-            budget_level=ai_data.get("budget_level", "MODERATE").upper(),
-            travel_style=ai_data.get("travel_style", "FAMILY").upper(),
+            budget_level=raw_budget.upper(),
+            travel_style=raw_style.upper(),
             duration=safe_duration,
-            season=ai_data.get("season", "SPRING").upper(),
+            season=safe_season,
             base_rate=base_rate,
-            ai_reason=ai_data.get("ai_reason", "")
+            ai_reason=ai_data.get("ai_reason") or "مقصد جذاب برای سفر"
         )
         new_places.append(new_place)
-
-    if new_places:
-        Place.objects.bulk_create(new_places)
-
-    return list(existing_places) + new_places
