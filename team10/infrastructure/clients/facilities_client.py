@@ -76,7 +76,9 @@ class MockFacilitiesClient(FacilitiesServicePort):
     }
 
     # Mock facilities data - Hotels and Restaurants organized by region
-    # Costs are in Rials (Iranian currency)
+    # Costs are in Rials (Iranian currency).
+    # NOTE: Hotel/restaurant pricing changes frequently; values here are *reasonable defaults*
+    # for UI/demo flows and can be tuned later.
     MOCK_FACILITIES: Dict[str, List[Facility]] = {
         # Tehran (region_id: "1")
         "1": [
@@ -144,6 +146,153 @@ class MockFacilitiesClient(FacilitiesServicePort):
                      cost=1000000, region_id="3", visit_duration_minutes=90, opening_hour=12, closing_hour=24,
                      tags=["food", "traditional"], rating=4.5, description="رستوران هفت خوان"),
         ],
+
+        # Mashhad (region_id: "4")
+        "4": [
+            # Hotels (approx. coordinates near city center)
+            Facility(id=4001, name="هتل درویشی", facility_type="HOTEL", latitude=36.2890, longitude=59.6130,
+                     cost=16000000, region_id="4", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["luxury"], rating=4.6, description="هتل پنج ستاره درویشی مشهد"),
+            Facility(id=4002, name="هتل قصر طلایی", facility_type="HOTEL", latitude=36.2895, longitude=59.6115,
+                     cost=14000000, region_id="4", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["luxury"], rating=4.5, description="هتل پنج ستاره قصر طلایی مشهد"),
+            Facility(id=4003, name="هتل الماس ۲", facility_type="HOTEL", latitude=36.2885, longitude=59.6122,
+                     cost=9000000, region_id="4", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["moderate"], rating=4.2, description="هتل الماس ۲ مشهد"),
+            # Restaurants
+            Facility(id=4101, name="رستوران پسران کریم", facility_type="RESTAURANT", latitude=36.2870, longitude=59.6105,
+                     cost=1200000, region_id="4", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "kebab"], rating=4.3, description="رستوران معروف پسران کریم"),
+            Facility(id=4102, name="رستوران معین درباری", facility_type="RESTAURANT", latitude=36.2867, longitude=59.6110,
+                     cost=1100000, region_id="4", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "traditional"], rating=4.2, description="رستوران معین درباری مشهد"),
+        ],
+
+        # Tabriz (region_id: "5")
+        "5": [
+            # Hotels (approx.)
+            Facility(id=5001, name="هتل پارس ائل‌گلی", facility_type="HOTEL", latitude=38.0230, longitude=46.3600,
+                     cost=12000000, region_id="5", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["luxury"], rating=4.2, description="هتل پارس ائل‌گلی تبریز"),
+            Facility(id=5002, name="هتل لاله پارک", facility_type="HOTEL", latitude=38.0700, longitude=46.3600,
+                     cost=13000000, region_id="5", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["luxury"], rating=4.3, description="هتل لاله پارک تبریز"),
+            Facility(id=5003, name="هتل شهریار", facility_type="HOTEL", latitude=38.0750, longitude=46.2800,
+                     cost=8000000, region_id="5", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["moderate"], rating=4.0, description="هتل شهریار تبریز"),
+            # Restaurants
+            Facility(id=5101, name="رستوران برکه", facility_type="RESTAURANT", latitude=38.0750, longitude=46.2900,
+                     cost=900000, region_id="5", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "traditional"], rating=4.1, description="رستوران سنتی برکه تبریز"),
+            Facility(id=5102, name="رستوران حاج علی", facility_type="RESTAURANT", latitude=38.0705, longitude=46.2960,
+                     cost=850000, region_id="5", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "kebab"], rating=4.0, description="رستوران حاج علی تبریز"),
+        ],
+
+        # Yazd (region_id: "6")
+        "6": [
+            # Hotels
+            Facility(id=6001, name="هتل داد", facility_type="HOTEL", latitude=31.88578, longitude=54.36591,
+                     cost=9000000, region_id="6", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["historic", "moderate"], rating=4.4, description="هتل تاریخی داد یزد"),
+            Facility(id=6002, name="هتل صفائیه", facility_type="HOTEL", latitude=31.8800, longitude=54.3560,
+                     cost=12000000, region_id="6", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["luxury"], rating=4.5, description="هتل صفائیه یزد"),
+            Facility(id=6003, name="هتل ملک‌التجار", facility_type="HOTEL", latitude=31.8970, longitude=54.3660,
+                     cost=8000000, region_id="6", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["historic"], rating=4.1, description="هتل سنتی ملک‌التجار"),
+            # Restaurants
+            Facility(id=6101, name="رستوران هتل داد", facility_type="RESTAURANT", latitude=31.88578, longitude=54.36591,
+                     cost=900000, region_id="6", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "traditional"], rating=4.2, description="رستوران مجموعه هتل داد"),
+            Facility(id=6102, name="رستوران ترمه و ترنج", facility_type="RESTAURANT", latitude=31.8972, longitude=54.3672,
+                     cost=800000, region_id="6", visit_duration_minutes=90, opening_hour=12, closing_hour=22,
+                     tags=["food", "traditional"], rating=4.0, description="رستوران سنتی در بافت تاریخی"),
+        ],
+
+        # Kerman (region_id: "7")
+        "7": [
+            # Hotels (approx.)
+            Facility(id=7001, name="هتل پارس کرمان", facility_type="HOTEL", latitude=30.2839, longitude=57.0834,
+                     cost=9000000, region_id="7", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["moderate"], rating=4.0, description="هتل پارس کرمان"),
+            Facility(id=7002, name="هتل جهانگردی", facility_type="HOTEL", latitude=30.2900, longitude=57.0800,
+                     cost=6000000, region_id="7", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["economy"], rating=3.7, description="هتل جهانگردی کرمان"),
+            Facility(id=7003, name="هتل اخوان", facility_type="HOTEL", latitude=30.2875, longitude=57.0780,
+                     cost=5000000, region_id="7", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["economy"], rating=3.6, description="هتل اخوان کرمان"),
+            # Restaurants
+            Facility(id=7101, name="رستوران عمارت وکیل", facility_type="RESTAURANT", latitude=30.2880, longitude=57.0790,
+                     cost=900000, region_id="7", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "traditional"], rating=4.1, description="رستوران سنتی در بافت تاریخی"),
+            Facility(id=7102, name="کافه رستوران گواوا", facility_type="RESTAURANT", latitude=30.2865, longitude=57.0820,
+                     cost=700000, region_id="7", visit_duration_minutes=60, opening_hour=10, closing_hour=23,
+                     tags=["food", "cafe"], rating=4.0, description="کافه رستوران مدرن"),
+        ],
+
+        # Rasht (region_id: "8")
+        "8": [
+            # Hotels (approx.)
+            Facility(id=8001, name="هتل کادوس بزرگ", facility_type="HOTEL", latitude=37.2808, longitude=49.5831,
+                     cost=8000000, region_id="8", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["moderate"], rating=4.0, description="هتل کادوس بزرگ رشت"),
+            Facility(id=8002, name="هتل شبستان", facility_type="HOTEL", latitude=37.2750, longitude=49.5950,
+                     cost=5000000, region_id="8", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["economy"], rating=3.7, description="هتل شبستان رشت"),
+            Facility(id=8003, name="هتل پامچال", facility_type="HOTEL", latitude=37.2790, longitude=49.5900,
+                     cost=4200000, region_id="8", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["economy"], rating=3.5, description="هتل پامچال رشت"),
+            # Restaurants
+            Facility(id=8101, name="رستوران محرم", facility_type="RESTAURANT", latitude=37.2793, longitude=49.5846,
+                     cost=900000, region_id="8", visit_duration_minutes=90, opening_hour=11, closing_hour=23,
+                     tags=["food", "local"], rating=4.2, description="غذاهای محلی گیلانی"),
+            Facility(id=8102, name="رستوران گیلانه", facility_type="RESTAURANT", latitude=37.2810, longitude=49.5820,
+                     cost=950000, region_id="8", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "local"], rating=4.1, description="رستوران با منوی گیلانی"),
+        ],
+
+        # Kish (region_id: "9")
+        "9": [
+            # Hotels
+            Facility(id=9001, name="هتل داریوش", facility_type="HOTEL", latitude=26.53504, longitude=54.02770,
+                     cost=16000000, region_id="9", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["luxury"], rating=4.4, description="هتل پنج ستاره داریوش کیش"),
+            Facility(id=9002, name="هتل ترنج", facility_type="HOTEL", latitude=26.5600, longitude=53.9500,
+                     cost=18000000, region_id="9", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["luxury"], rating=4.5, description="هتل دریایی ترنج کیش"),
+            Facility(id=9003, name="هتل شایان", facility_type="HOTEL", latitude=26.5580, longitude=54.0200,
+                     cost=11000000, region_id="9", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["moderate"], rating=4.0, description="هتل شایان کیش"),
+            # Restaurants
+            Facility(id=9101, name="رستوران میرمهنا", facility_type="RESTAURANT", latitude=26.5578, longitude=54.0194,
+                     cost=1400000, region_id="9", visit_duration_minutes=90, opening_hour=12, closing_hour=24,
+                     tags=["food", "seafood"], rating=4.2, description="رستوران دریایی میرمهنا"),
+            Facility(id=9102, name="رستوران کوه نور", facility_type="RESTAURANT", latitude=26.5550, longitude=54.0220,
+                     cost=1300000, region_id="9", visit_duration_minutes=90, opening_hour=12, closing_hour=24,
+                     tags=["food", "traditional"], rating=4.1, description="رستوران کوه نور کیش"),
+        ],
+
+        # Qeshm (region_id: "10")
+        "10": [
+            # Hotels (approx.)
+            Facility(id=10001, name="هتل آتامان", facility_type="HOTEL", latitude=26.9560, longitude=56.2690,
+                     cost=8000000, region_id="10", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["moderate"], rating=4.0, description="هتل آتامان قشم"),
+            Facility(id=10002, name="هتل ارم", facility_type="HOTEL", latitude=26.9620, longitude=56.2695,
+                     cost=6500000, region_id="10", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["economy"], rating=3.7, description="هتل ارم قشم"),
+            Facility(id=10003, name="هتل دیپلمات", facility_type="HOTEL", latitude=26.9550, longitude=56.2680,
+                     cost=5500000, region_id="10", visit_duration_minutes=0, opening_hour=0, closing_hour=24,
+                     tags=["economy"], rating=3.5, description="هتل دیپلمات قشم"),
+            # Restaurants
+            Facility(id=10101, name="رستوران خاله", facility_type="RESTAURANT", latitude=26.9565, longitude=56.2700,
+                     cost=1200000, region_id="10", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "seafood"], rating=4.1, description="رستوران دریایی خاله"),
+            Facility(id=10102, name="رستوران نعیم", facility_type="RESTAURANT", latitude=26.9575, longitude=56.2685,
+                     cost=1100000, region_id="10", visit_duration_minutes=90, opening_hour=12, closing_hour=23,
+                     tags=["food", "seafood"], rating=4.0, description="غذاهای دریایی و محلی"),
+        ],
     }
 
     # Facility details for places recommended by the Recommender service
@@ -154,7 +303,7 @@ class MockFacilitiesClient(FacilitiesServicePort):
             "برج_میلاد": Facility(id=1201, name="برج میلاد", facility_type="ATTRACTION", latitude=35.7448, longitude=51.3753,
                      cost=500000, region_id="1", visit_duration_minutes=120, opening_hour=9, closing_hour=22,
                      tags=["modern", "sightseeing"], rating=4.3, description="برج میلاد - نماد مدرن تهران"),
-            "کاخ_گلستان": Facility(id=1202, name="کاخ گلستان", facility_type="ATTRACTION", latitude=35.6836, longitude=51.4174,
+            "کاخ_گلستان": Facility(id=1202, name="کاخ گلستان", facility_type="ATTRACTION", latitude=35.6775, longitude=51.4181,
                      cost=300000, region_id="1", visit_duration_minutes=150, opening_hour=9, closing_hour=17,
                      tags=["history", "culture"], rating=4.7, description="کاخ گلستان - میراث جهانی یونسکو"),
             "پل_طبیعت": Facility(id=1203, name="پل طبیعت", facility_type="ATTRACTION", latitude=35.7635, longitude=51.4053,
@@ -171,16 +320,16 @@ class MockFacilitiesClient(FacilitiesServicePort):
             "میدان_نقش_جهان": Facility(id=2201, name="میدان نقش جهان", facility_type="ATTRACTION", latitude=32.6575, longitude=51.6774,
                      cost=0, region_id="2", visit_duration_minutes=120, opening_hour=6, closing_hour=22,
                      tags=["history", "culture", "shopping"], rating=4.9, description="میدان نقش جهان - میراث جهانی"),
-            "سی_و_سه_پل": Facility(id=2202, name="سی و سه پل", facility_type="ATTRACTION", latitude=32.6421, longitude=51.6648,
+            "سی_و_سه_پل": Facility(id=2202, name="سی و سه پل", facility_type="ATTRACTION", latitude=32.6431, longitude=51.6689,
                      cost=0, region_id="2", visit_duration_minutes=60, opening_hour=0, closing_hour=24,
                      tags=["history", "nature"], rating=4.6, description="پل سی و سه چشمه"),
             "مسجد_شیخ_لطف_الله": Facility(id=2203, name="مسجد شیخ لطف الله", facility_type="ATTRACTION", latitude=32.6574, longitude=51.6780,
                      cost=200000, region_id="2", visit_duration_minutes=60, opening_hour=9, closing_hour=17,
                      tags=["history", "culture", "religion"], rating=4.8, description="مسجد شیخ لطف‌الله"),
-            "کاخ_عالی_قاپو": Facility(id=2204, name="کاخ عالی قاپو", facility_type="ATTRACTION", latitude=32.6576, longitude=51.6765,
+            "کاخ_عالی_قاپو": Facility(id=2204, name="کاخ عالی قاپو", facility_type="ATTRACTION", latitude=32.6572, longitude=51.6771,
                      cost=250000, region_id="2", visit_duration_minutes=90, opening_hour=9, closing_hour=18,
                      tags=["history", "culture"], rating=4.5, description="کاخ عالی قاپو"),
-            "کلیسای_وانک": Facility(id=2205, name="کلیسای وانک", facility_type="ATTRACTION", latitude=32.6389, longitude=51.6550,
+            "کلیسای_وانک": Facility(id=2205, name="کلیسای وانک", facility_type="ATTRACTION", latitude=32.634922, longitude=51.655792,
                      cost=150000, region_id="2", visit_duration_minutes=90, opening_hour=9, closing_hour=17,
                      tags=["history", "culture", "religion"], rating=4.4, description="کلیسای وانک جلفا"),
         },
@@ -200,6 +349,133 @@ class MockFacilitiesClient(FacilitiesServicePort):
             "نارنجستان_قوام": Facility(id=3205, name="نارنجستان قوام", facility_type="ATTRACTION", latitude=29.6125, longitude=52.5458,
                      cost=150000, region_id="3", visit_duration_minutes=60, opening_hour=8, closing_hour=18,
                      tags=["history", "culture", "nature"], rating=4.3, description="خانه قوام - نارنجستان"),
+        },
+
+        "4": {  # Mashhad
+            "حرم_امام_رضا": Facility(id=4201, name="حرم امام رضا", facility_type="ATTRACTION", latitude=36.28723, longitude=59.61586,
+                     cost=0, region_id="4", visit_duration_minutes=180, opening_hour=0, closing_hour=24,
+                     tags=["religion", "culture"], rating=4.9, description="حرم امام رضا (ع) - مهم‌ترین مرکز زیارتی ایران"),
+            "باغ_نادری": Facility(id=4202, name="باغ نادری (آرامگاه نادرشاه)", facility_type="ATTRACTION", latitude=36.29479, longitude=59.61061,
+                     cost=200000, region_id="4", visit_duration_minutes=90, opening_hour=8, closing_hour=19,
+                     tags=["history", "museum"], rating=4.4, description="مجموعه باغ نادری و آرامگاه نادرشاه"),
+            "کوه_سنگی": Facility(id=4203, name="پارک کوه‌سنگی", facility_type="ATTRACTION", latitude=36.28278, longitude=59.56750,
+                     cost=0, region_id="4", visit_duration_minutes=120, opening_hour=0, closing_hour=24,
+                     tags=["park", "nature"], rating=4.5, description="پارک کوه‌سنگی مشهد"),
+            "پارک_ملت": Facility(id=4204, name="پارک ملت", facility_type="ATTRACTION", latitude=36.32111, longitude=59.53778,
+                     cost=0, region_id="4", visit_duration_minutes=120, opening_hour=0, closing_hour=24,
+                     tags=["park", "nature"], rating=4.4, description="پارک ملت مشهد"),
+            "موزه_آستان_قدس": Facility(id=4205, name="موزه آستان قدس رضوی", facility_type="ATTRACTION", latitude=36.28780, longitude=59.61630,
+                     cost=150000, region_id="4", visit_duration_minutes=120, opening_hour=8, closing_hour=17,
+                     tags=["museum", "culture"], rating=4.3, description="موزه‌های آستان قدس رضوی"),
+        },
+
+        "5": {  # Tabriz
+            "بازار_تبریز": Facility(id=5201, name="بازار تاریخی تبریز", facility_type="ATTRACTION", latitude=38.08139, longitude=46.29306,
+                     cost=0, region_id="5", visit_duration_minutes=150, opening_hour=9, closing_hour=17,
+                     tags=["shopping", "history"], rating=4.6, description="بازار تاریخی تبریز (ثبت جهانی یونسکو)"),
+            "مسجد_کبود": Facility(id=5202, name="مسجد کبود تبریز", facility_type="ATTRACTION", latitude=38.07361, longitude=46.30083,
+                     cost=100000, region_id="5", visit_duration_minutes=60, opening_hour=9, closing_hour=17,
+                     tags=["history", "culture", "religion"], rating=4.4, description="مسجد کبود (فیروزه اسلام)"),
+            "ائل_گلی": Facility(id=5203, name="ائل‌گلی (شاه‌گلی)", facility_type="ATTRACTION", latitude=38.02540, longitude=46.36411,
+                     cost=0, region_id="5", visit_duration_minutes=120, opening_hour=0, closing_hour=24,
+                     tags=["park", "nature"], rating=4.5, description="پارک ائل‌گلی تبریز"),
+            "ارگ_علیشاه": Facility(id=5204, name="ارگ علی‌شاه", facility_type="ATTRACTION", latitude=38.06660, longitude=46.29050,
+                     cost=0, region_id="5", visit_duration_minutes=60, opening_hour=9, closing_hour=17,
+                     tags=["history", "culture"], rating=4.1, description="بقایای ارگ علی‌شاه تبریز"),
+            "قلعه_بابک": Facility(id=5205, name="قلعه بابک", facility_type="ATTRACTION", latitude=38.84200, longitude=47.02800,
+                     cost=0, region_id="5", visit_duration_minutes=240, opening_hour=8, closing_hour=18,
+                     tags=["history", "hiking"], rating=4.6, description="قلعه بابک (نزدیک کلیبر)"),
+        },
+
+        "6": {  # Yazd
+            "مسجد_جامع_یزد": Facility(id=6201, name="مسجد جامع یزد", facility_type="ATTRACTION", latitude=31.89700, longitude=54.36770,
+                     cost=0, region_id="6", visit_duration_minutes=60, opening_hour=8, closing_hour=20,
+                     tags=["history", "religion", "architecture"], rating=4.6, description="مسجد جامع یزد (کاشی‌کاری و مناره‌های بلند)"),
+            "باغ_دولت_آباد": Facility(id=6202, name="باغ دولت‌آباد", facility_type="ATTRACTION", latitude=31.88890, longitude=54.36690,
+                     cost=150000, region_id="6", visit_duration_minutes=90, opening_hour=8, closing_hour=20,
+                     tags=["nature", "history"], rating=4.6, description="باغ دولت‌آباد و بادگیر معروف"),
+            "برج_خاموشان": Facility(id=6203, name="دخمه زرتشتیان (برج خاموشان)", facility_type="ATTRACTION", latitude=31.95000, longitude=54.34600,
+                     cost=100000, region_id="6", visit_duration_minutes=90, opening_hour=8, closing_hour=18,
+                     tags=["history", "culture"], rating=4.2, description="برج خاموشان (دخمه زرتشتیان)"),
+            "زندان_اسکندر": Facility(id=6204, name="زندان اسکندر", facility_type="ATTRACTION", latitude=31.89780, longitude=54.36720,
+                     cost=80000, region_id="6", visit_duration_minutes=60, opening_hour=8, closing_hour=20,
+                     tags=["history", "culture"], rating=4.1, description="مدرسه ضیائیه (معروف به زندان اسکندر)"),
+            "آتشکده_یزد": Facility(id=6205, name="آتشکده یزد", facility_type="ATTRACTION", latitude=31.89950, longitude=54.36890,
+                     cost=120000, region_id="6", visit_duration_minutes=60, opening_hour=8, closing_hour=20,
+                     tags=["religion", "culture"], rating=4.3, description="آتشکده یزد (آتش ورهرام)"),
+        },
+
+        "7": {  # Kerman
+            "باغ_شاهزاده_ماهان": Facility(id=7201, name="باغ شاهزاده ماهان", facility_type="ATTRACTION", latitude=30.02295, longitude=57.28114,
+                     cost=200000, region_id="7", visit_duration_minutes=120, opening_hour=8, closing_hour=18,
+                     tags=["nature", "history"], rating=4.7, description="باغ شاهزاده ماهان"),
+            "گنبد_جبلیه": Facility(id=7202, name="گنبد جبلیه", facility_type="ATTRACTION", latitude=30.29233, longitude=57.11681,
+                     cost=0, region_id="7", visit_duration_minutes=45, opening_hour=8, closing_hour=18,
+                     tags=["history", "architecture"], rating=4.1, description="گنبد سنگی جبلیه"),
+            "بازار_سرچشمه": Facility(id=7203, name="بازار تاریخی کرمان (سرچشمه)", facility_type="ATTRACTION", latitude=30.28850, longitude=57.07850,
+                     cost=0, region_id="7", visit_duration_minutes=120, opening_hour=9, closing_hour=18,
+                     tags=["shopping", "history"], rating=4.2, description="بازار وکیل/گنجعلیخان و راسته‌های تاریخی کرمان"),
+            "مجموعه_گنجعلیخان": Facility(id=7204, name="مجموعه گنجعلی‌خان", facility_type="ATTRACTION", latitude=30.29056, longitude=57.07833,
+                     cost=150000, region_id="7", visit_duration_minutes=120, opening_hour=9, closing_hour=17,
+                     tags=["history", "museum"], rating=4.5, description="مجموعه گنجعلی‌خان (حمام، بازار و ...)"),
+            "کلوت_شهداد": Facility(id=7205, name="کلوت‌های شهداد (کویر لوت)", facility_type="ATTRACTION", latitude=30.41670, longitude=57.68330,
+                     cost=0, region_id="7", visit_duration_minutes=240, opening_hour=0, closing_hour=24,
+                     tags=["nature", "desert"], rating=4.6, description="کلوت‌های شهداد در حاشیه کویر لوت"),
+        },
+
+        "8": {  # Rasht
+            "بازار_رشت": Facility(id=8201, name="بازار رشت", facility_type="ATTRACTION", latitude=37.28083, longitude=49.58306,
+                     cost=0, region_id="8", visit_duration_minutes=120, opening_hour=8, closing_hour=18,
+                     tags=["shopping", "local"], rating=4.3, description="بازار سنتی رشت"),
+            "موزه_میراث_روستایی": Facility(id=8202, name="موزه میراث روستایی گیلان", facility_type="ATTRACTION", latitude=37.22700, longitude=49.70200,
+                     cost=200000, region_id="8", visit_duration_minutes=150, opening_hour=9, closing_hour=17,
+                     tags=["museum", "culture"], rating=4.5, description="موزه میراث روستایی گیلان (سراوان)"),
+            "تالاب_انزلی": Facility(id=8203, name="تالاب انزلی", facility_type="ATTRACTION", latitude=37.46930, longitude=49.45730,
+                     cost=0, region_id="8", visit_duration_minutes=180, opening_hour=0, closing_hour=24,
+                     tags=["nature", "wildlife"], rating=4.4, description="تالاب انزلی"),
+            "قلعه_رودخان": Facility(id=8204, name="قلعه رودخان", facility_type="ATTRACTION", latitude=37.06444, longitude=49.24000,
+                     cost=150000, region_id="8", visit_duration_minutes=240, opening_hour=8, closing_hour=18,
+                     tags=["history", "hiking"], rating=4.7, description="قلعه رودخان (فومن)"),
+            "پارک_جنگلی_سراوان": Facility(id=8205, name="پارک جنگلی سراوان", facility_type="ATTRACTION", latitude=37.22700, longitude=49.70200,
+                     cost=0, region_id="8", visit_duration_minutes=180, opening_hour=0, closing_hour=24,
+                     tags=["nature", "park"], rating=4.3, description="پارک جنگلی سراوان"),
+        },
+
+        "9": {  # Kish
+            "پارک_مرجانی": Facility(id=9201, name="پارک ساحلی مرجان", facility_type="ATTRACTION", latitude=26.54600, longitude=54.07000,
+                     cost=0, region_id="9", visit_duration_minutes=120, opening_hour=0, closing_hour=24,
+                     tags=["beach", "nature"], rating=4.5, description="پارک ساحلی مرجان"),
+            "شهر_زیرزمینی_کاریز": Facility(id=9202, name="شهر زیرزمینی کاریز", facility_type="ATTRACTION", latitude=26.55667, longitude=53.96889,
+                     cost=300000, region_id="9", visit_duration_minutes=90, opening_hour=9, closing_hour=18,
+                     tags=["history", "underground"], rating=4.2, description="قنات/شهر زیرزمینی کاریز کیش"),
+            "کشتی_یونانی": Facility(id=9203, name="کشتی یونانی", facility_type="ATTRACTION", latitude=26.52611, longitude=53.90806,
+                     cost=0, region_id="9", visit_duration_minutes=60, opening_hour=0, closing_hour=24,
+                     tags=["beach", "sightseeing"], rating=4.3, description="کشتی یونانی (غروب‌های معروف کیش)"),
+            "ساحل_مرجان": Facility(id=9204, name="ساحل مرجان", facility_type="ATTRACTION", latitude=26.54600, longitude=54.07000,
+                     cost=0, region_id="9", visit_duration_minutes=120, opening_hour=0, closing_hour=24,
+                     tags=["beach"], rating=4.5, description="ساحل مرجان"),
+            "اسکله_تفریحی": Facility(id=9205, name="اسکله تفریحی کیش", facility_type="ATTRACTION", latitude=26.55778, longitude=54.01944,
+                     cost=0, region_id="9", visit_duration_minutes=120, opening_hour=0, closing_hour=24,
+                     tags=["beach", "recreation"], rating=4.4, description="اسکله تفریحی کیش"),
+        },
+
+        "10": {  # Qeshm
+            "جنگل_حرا": Facility(id=10201, name="جنگل حرا", facility_type="ATTRACTION", latitude=26.70817, longitude=55.91692,
+                     cost=0, region_id="10", visit_duration_minutes=180, opening_hour=0, closing_hour=24,
+                     tags=["nature", "mangrove"], rating=4.6, description="جنگل‌های حرا (مانگرو) قشم"),
+            "دره_ستارگان": Facility(id=10202, name="دره ستارگان", facility_type="ATTRACTION", latitude=26.84280, longitude=55.86780,
+                     cost=250000, region_id="10", visit_duration_minutes=120, opening_hour=8, closing_hour=20,
+                     tags=["nature", "geopark"], rating=4.6, description="دره ستارگان (ژئوپارک قشم)"),
+            "غار_نمکدان": Facility(id=10203, name="غار نمکدان", facility_type="ATTRACTION", latitude=26.61750, longitude=55.51667,
+                     cost=0, region_id="10", visit_duration_minutes=150, opening_hour=0, closing_hour=24,
+                     tags=["nature", "cave"], rating=4.5, description="غار نمکدان (از طولانی‌ترین غارهای نمکی جهان)"),
+            "تنگه_چاهکوه": Facility(id=10204, name="تنگه چاهکوه", facility_type="ATTRACTION", latitude=26.68419, longitude=55.53779,
+                     cost=200000, region_id="10", visit_duration_minutes=150, opening_hour=0, closing_hour=24,
+                     tags=["nature", "canyon"], rating=4.6, description="تنگه چاهکوه"),
+            # The previous mock used "ساحل_مرجانی"; keep it as a stable key.
+            "ساحل_مرجانی": Facility(id=10205, name="ساحل/اسکله قشم (نمونه)", facility_type="ATTRACTION", latitude=26.69528, longitude=55.61833,
+                     cost=0, region_id="10", visit_duration_minutes=120, opening_hour=0, closing_hour=24,
+                     tags=["beach"], rating=4.2, description="نمونه ساحلی در قشم (برای ماک)"),
         },
     }
 

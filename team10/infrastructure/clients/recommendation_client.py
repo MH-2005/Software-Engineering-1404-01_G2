@@ -44,11 +44,23 @@ class MockRecommendationClient(RecommendationServicePort):
         destination: str,
         season: Season
     ) -> List[RecommendedPlace]:
+        """Return place recommendations.
+
+        This is still a *mock* recommender, but the scores are made **deterministic**
+        per (user_id, region_id, destination, season) so that UI tests and manual
+        QA are reproducible.
+        """
+
         places = self.MOCK_PLACES.get(region_id, self.DEFAULT_PLACES)
+
+        # Deterministic pseudo-random generator for stable results
+        seed = hash((user_id, region_id, destination, season.value)) & 0xFFFFFFFF
+        rng = random.Random(seed)
 
         recommendations = []
         for place_id in places:
-            score = round(random.uniform(0.5, 1.0), 2)
+            # Keep scores in a realistic band; later can be replaced by real ML.
+            score = round(rng.uniform(0.70, 0.95), 2)
             recommendations.append(RecommendedPlace(place_id=place_id, score=score))
 
         # Sort by score descending

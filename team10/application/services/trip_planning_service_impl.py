@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, date
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any, Union
 from dataclasses import dataclass
 
 import jdatetime
@@ -10,6 +10,7 @@ from django.db.models import Q
 from ...infrastructure import WikiServicePort
 from ...models import Trip as TripModel, TripRequirements as TripRequirementsModel, PreferenceConstraint as PreferenceConstraintModel
 from ...domain.entities.trip import Trip
+from ...domain.enums import TripStatus
 from ...domain.models.change_trigger import ChangeTrigger
 from ...domain.models.cost_analysis_result import CostAnalysisResult
 from ...domain.models.facility import Facility
@@ -91,17 +92,25 @@ class TripPlanningServiceImpl(TripPlanningService):
         start_date = datetime.fromisoformat(requirements_data['start_date'])
         end_date = datetime.fromisoformat(requirements_data['end_date'])
         today = datetime.now().date()
+        start_d = start_date.date()
+        end_d = end_date.date()
 
         def _jalali_date_str(date_value: date) -> str:
             jalali = jdatetime.date.fromgregorian(date=date_value).strftime("%Y/%m/%d")
             return jalali.translate(str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹"))
 
-        if start_date.date() < today:
-            jalali_start = _jalali_date_str(start_date.date())
+        if end_d < start_d:
+            jalali_start = _jalali_date_str(start_d)
+            jalali_end = _jalali_date_str(end_d)
+            raise ValueError(f"تاریخ پایان نمی‌تواند قبل از تاریخ شروع باشد: {jalali_start} تا {jalali_end}")
+        if start_d < today:
+            jalali_start = _jalali_date_str(start_d)
             raise ValueError(f"تاریخ شروع نمی‌تواند قبل از امروز باشد: {jalali_start}")
-        if end_date.date() < today:
-            jalali_end = _jalali_date_str(end_date.date())
+        if end_d < today:
+            jalali_end = _jalali_date_str(end_d)
             raise ValueError(f"تاریخ پایان نمی‌تواند قبل از امروز باشد: {jalali_end}")
+
+        trip_status = self._resolve_trip_status(start_date, end_date, today=today)
 
         # Search region via facilities service (done outside transaction - read-only external call)
         destination_query = requirements_data['destination']
@@ -149,7 +158,7 @@ class TripPlanningServiceImpl(TripPlanningService):
                 user_id=user_id,
                 requirements=requirements,
                 destination_name=region.name,
-                status='DRAFT'
+                status=trip_status
             )
 
             # Build the actual daily plan using recommendations
@@ -806,6 +815,10 @@ class TripPlanningServiceImpl(TripPlanningService):
                 recommended_places=recommended_places
             )
 
+            trip.status = self._resolve_trip_status(
+                trip.requirements.start_at,
+                trip.requirements.end_at
+            )
             trip.updated_at = datetime.now()
             trip.save()
 
@@ -922,20 +935,65 @@ class TripPlanningServiceImpl(TripPlanningService):
         for trip in trips:
             req = trip.requirements
             days = (req.end_at - req.start_at).days if req.end_at and req.start_at else 0
+            display_status, display_status_label_fa = self._compute_display_status(
+                req.start_at,
+                req.end_at
+            )
             
             result.append({
                 'id': trip.id,
                 'destination_name': trip.destination_name or req.destination_name,
                 'start_at': req.start_at,
+                'end_at': req.end_at,
                 'days': days,
                 'budget_level': req.budget_level,
                 'travelers_count': req.travelers_count,
                 'total_cost': trip.calculate_total_cost(),
                 'status': trip.status,
+                'display_status': display_status,
+                'display_status_label_fa': display_status_label_fa,
                 'created_at': trip.created_at,
             })
         
         return result
+
+    def _resolve_trip_status(
+        self,
+        start_date: datetime,
+        end_date: datetime,
+        today: Optional[date] = None
+    ) -> str:
+        """Resolve trip status based on start/end dates using date-only comparison."""
+        if today is None:
+            today = datetime.now().date()
+
+        start_d = start_date.date()
+        end_d = end_date.date()
+
+        if start_d > today:
+            return TripStatus.DRAFT.value
+        if start_d <= today <= end_d:
+            return TripStatus.IN_PROGRESS.value
+        return TripStatus.EXPIRED.value
+
+    def _compute_display_status(
+        self,
+        start_at: Optional[Union[datetime, date]],
+        end_at: Optional[Union[datetime, date]]
+    ) -> Tuple[str, str]:
+        """Compute display status based on start/end dates (date-only comparison)."""
+        if not start_at or not end_at:
+            return "UNKNOWN", "نامشخص"
+
+        today = datetime.now().date()
+        start_date = start_at.date() if isinstance(start_at, datetime) else start_at
+        end_date = end_at.date() if isinstance(end_at, datetime) else end_at
+
+        if start_date > today:
+            return "DRAFT", "پیش‌نویس"
+        if start_date <= today < end_date:
+            return "IN_PROGRESS", "در حال اجرا"
+        return "COMPLETED", "پایان‌یافته"
 
     def _get_preference_description(self, preference_tag: str) -> str:
         """Get description for preference tag (canonical styles)."""
