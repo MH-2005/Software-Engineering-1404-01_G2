@@ -3,7 +3,7 @@ from django.shortcuts import render
 from core.auth import api_login_required
 from django.utils.decorators import method_decorator
 import requests
-
+from .data_manager import *
 from rest_framework.views import APIView
 from django.views.decorators.http import require_http_methods
 from django.conf import settings
@@ -81,7 +81,7 @@ class ScoreCandidatePlacesView(APIView):
         if not candidate_ids:
             return JsonResponse({"scored_places": []})
 
-        places = Place.objects.filter(place_id__in=candidate_ids)
+        places = get_or_enrich_places(candidate_place_ids)
         if not places.exists():
             return JsonResponse({"scored_places": []})
 
