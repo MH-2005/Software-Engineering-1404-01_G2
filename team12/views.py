@@ -26,27 +26,9 @@ def ping(request):
 def base(request):
     return render(request, f"{TEAM_NAME}/index.html")
 
-
-
 # Helper to format error responses as per OpenAPI schema
 def error_response(message, code="INVALID_PARAMETER", status=400):
     return JsonResponse({"error": {"code": code, "message": message}}, status=status)
-
-def fetch_external_data(self, place_id):
-    context = {"wiki": {}, "media": {}}
-    try:
-        wiki_res = requests.get(f"{WIKI_SERVICE_URL}?place_id={place_id}", timeout=2)
-        if wiki_res.status_code == 200:
-            context["wiki"] = wiki_res.json()
-
-        media_res = requests.get(f"{MEDIA_SERVICE_URL}?place_id={place_id}", timeout=2)
-        if media_res.status_code == 200:
-            context["media"] = media_res.json()
-    except Exception as e:
-        print(f"Error fetching from external services: {e}")
-    
-    return context
-
 
 def fetch_external_data(self, place_id):
     context = {"wiki": {}, "media": {}}
