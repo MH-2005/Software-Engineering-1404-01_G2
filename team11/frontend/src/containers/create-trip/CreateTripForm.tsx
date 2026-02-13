@@ -4,7 +4,7 @@ import Button from '../../components/ui/Button';
 import ChipButton from '@/components/ui/ChipButton';
 import TextField from '@/components/ui/TextField';
 import { TRAVEL_STYLES, BUDGET_LEVELS, INITIAL_INTERESTS, PROGRAM_DENSITY } from '../suggest-destination/constants';
-import { PROVINCES_DETAILS } from '@/constants';
+import { PROVINCES_DETAILS, CITIES_MAP } from '@/constants';
 import DatePicker from '@/components/ui/DatePicker';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { tripApi } from '@/services/api';
@@ -12,8 +12,6 @@ import { useNotification } from '@/contexts/NotificationContext';
 import { CreateTripPayload, TripStyle, BudgetLevel } from '@/types/trip';
 
 const PROVINCES = Object.values(PROVINCES_DETAILS).map((prov) => ({ value: prov.province, label: prov.name }));
-
-const CITIES: { value: string; label: string }[] = [];
 
 const CreateTripForm = () => {
   const navigate = useNavigate();
@@ -191,7 +189,7 @@ const CreateTripForm = () => {
       {/* Select Grid - 4 items (province, city, start, end) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Select label="استان *" name="province" value={formData.province ?? ''} options={PROVINCES} onChange={handleSelectChange} required />
-        <Select label="شهر / روستا" name="city" value={formData.city ?? ''} options={CITIES} onChange={handleSelectChange} />
+        <Select label="شهر / روستا" name="city" value={formData.city ?? ''} options={CITIES_MAP[formData.province || ''] || []} onChange={handleSelectChange} />
         <DatePicker
           label="تاریخ شروع سفر *"
           value={formData.startDate}

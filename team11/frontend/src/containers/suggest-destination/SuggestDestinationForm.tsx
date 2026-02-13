@@ -5,7 +5,7 @@ import Button from '../../components/ui/Button';
 import ChipButton from '@/components/ui/ChipButton';
 import TextField from '@/components/ui/TextField';
 import { useApi } from '@/hooks/useApi';
-import { getMockDestinations } from '@/services/mockService';
+import { destinationApi } from '@/services/api';
 import {
     TRAVEL_SEASONS,
     TRAVEL_STYLES,
@@ -14,6 +14,7 @@ import {
 } from './constants';
 import DestinationCard from './DestinationCard';
 import { PROVINCES_DETAILS } from '@/constants';
+import { useNotification } from '@/contexts/NotificationContext';
 
 const SuggestDestinationForm = () => {
     const navigate = useNavigate();
@@ -35,7 +36,9 @@ const SuggestDestinationForm = () => {
     const [newInterestLabel, setNewInterestLabel] = useState('');
 
     // useApi configured to reset data on new load for a cleaner UX
-    const { isLoading, request, data: destinationsData } = useApi(getMockDestinations, { resetDataOnLoading: true });
+    const { isLoading, request, data: destinationsData } = useApi(destinationApi.suggest, { resetDataOnLoading: true });
+
+    const { success: showSuccess, error: showError } = useNotification();
 
     // Valid if at least one selection is made or an interest is chosen
     const isFormValid = Object.values(formData).some(val => val !== null) || selectedInterestValues.length > 0;
@@ -96,12 +99,12 @@ const SuggestDestinationForm = () => {
             interests: selectedInterestValues
         };
 
-        console.log(payload)
-
         try {
             await request(payload);
-        } catch (err) {
-            console.error("Submission failed", err);
+            showSuccess('مقاصد با موفقیت دریافت شدند!');
+        } catch (error) {
+            console.error('Failed to fetch destinations:', error);
+            showError('خطا در دریافت مقاصد. لطفاً دوباره تلاش کنید.');
         }
     };
 

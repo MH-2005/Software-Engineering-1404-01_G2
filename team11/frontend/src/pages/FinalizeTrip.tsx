@@ -37,7 +37,7 @@ const FinalizeTrip: React.FC = () => {
         onConfirm: () => { },
     });
     const [isDialogLoading, setIsDialogLoading] = useState(false);
-    const { data, isLoading, error, request } = useApi(getMockTrip);
+    const { data, isLoading, error, request } = useApi(tripApi.getById);
 
     useEffect(() => {
         if (tripId) {

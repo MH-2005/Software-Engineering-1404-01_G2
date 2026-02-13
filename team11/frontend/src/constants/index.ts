@@ -46,3 +46,538 @@ export const PROVINCES_DETAILS: Record<string, { province: string; name: string;
   yazd: { province: 'yazd', name: 'یزد', image: 'https://ammi.ir/wp-content/uploads/1__15__result-40.jpg' },
   zanjan: { province: 'zanjan', name: 'زنجان', image: 'https://ammi.ir/wp-content/uploads/1-__22_-4.jpg' },
 };
+
+export const CITIES_MAP: Record<string, { value: string; label: string }[]> = {
+  // استان البرز
+  alborz: [
+    { value: 'karaj', label: 'کرج' },
+    { value: 'kamal_shahr', label: 'کمال‌شهر' },
+    { value: 'nazarabad', label: 'نظرآباد' },
+    { value: 'mohammadshahr', label: 'محمدشهر' },
+    { value: 'hashtgerd', label: 'هشتگرد' },
+    { value: 'eshtehard', label: 'اشتهارد' },
+    { value: 'fardis', label: 'فردیس' },
+    { value: 'mahdasht', label: 'مه‌دشت' },
+    { value: 'meshkin_dasht', label: 'مشکیندشت' },
+    { value: 'chaharbagh', label: 'چهارباغ' },
+    { value: 'golsar', label: 'گلسار' },
+    { value: 'kuhsar', label: 'کوهسار' },
+    { value: 'taleqan', label: 'طالقان' },
+    { value: 'asara', label: 'آسارا' },
+    { value: 'tankaman', label: 'تنکمان' }
+  ],
+
+  // استان اردبیل
+  ardabil: [
+    { value: 'ardabil', label: 'اردبیل' },
+    { value: 'parsabad', label: 'پارس‌آباد' },
+    { value: 'meshginshahr', label: 'مشگین‌شهر' },
+    { value: 'khalkhal', label: 'خلخال' },
+    { value: 'germi', label: 'گرمی' },
+    { value: 'bileh_savar', label: 'بیله‌سوار' },
+    { value: 'namin', label: 'نمین' },
+    { value: 'nir', label: 'نیر' },
+    { value: 'sareyn', label: 'سرعین' },
+    { value: 'kivi', label: 'کیوی' },
+    { value: 'aslan_duz', label: 'اصلاندوز' },
+    { value: 'ab_i_beyglu', label: 'آبی‌بیگلو' },
+    { value: 'hashatjin', label: 'هشتجین' },
+    { value: 'lahrud', label: 'لاهرود' },
+    { value: 'hir', label: 'هیر' }
+  ],
+
+  // استان آذربایجان شرقی
+  azarbaijan_east: [
+    { value: 'tabriz', label: 'تبریز' },
+    { value: 'maragheh', label: 'مراغه' },
+    { value: 'marand', label: 'مرند' },
+    { value: 'ahar', label: 'اهر' },
+    { value: 'bonab', label: 'بناب' },
+    { value: 'sarāb', label: 'سراب' },
+    { value: 'miyaneh', label: 'میانه' },
+    { value: 'azarshahr', label: 'آذرشهر' },
+    { value: 'shabestar', label: 'شبستر' },
+    { value: 'hashtrud', label: 'هشترود' },
+    { value: 'jolfa', label: 'جلفا' },
+    { value: 'bostanabad', label: 'بستان‌آباد' },
+    { value: 'malekan', label: 'ملکان' },
+    { value: 'oskou', label: 'اسکو' },
+    { value: 'heris', label: 'هریس' }
+  ],
+
+  // استان آذربایجان غربی
+  azarbaijan_west: [
+    { value: 'urmia', label: 'ارومیه' },
+    { value: 'khoy', label: 'خوی' },
+    { value: 'maku', label: 'ماکو' },
+    { value: 'mahabad', label: 'مهاباد' },
+    { value: 'miandoab', label: 'میاندوآب' },
+    { value: 'salmas', label: 'سلماس' },
+    { value: 'piranshahr', label: 'پیرانشهر' },
+    { value: 'naqadeh', label: 'نقده' },
+    { value: 'takab', label: 'تکاب' },
+    { value: 'sardasht', label: 'سردشت' },
+    { value: 'shahindezh', label: 'شاهیندژ' },
+    { value: 'bukan', label: 'بوکان' },
+    { value: 'chaldoran', label: 'چالدران' },
+    { value: 'poldasht', label: 'پلدشت' },
+    { value: 'showt', label: 'شوط' }
+  ],
+
+  // استان بوشهر
+  bushehr: [
+    { value: 'bushehr', label: 'بوشهر' },
+    { value: 'borazjan', label: 'برازجان' },
+    { value: 'bandar_ganaveh', label: 'بندر گناوه' },
+    { value: 'bandar_kangan', label: 'بندر کنگان' },
+    { value: 'khormoj', label: 'خورموج' },
+    { value: 'jam', label: 'جم' },
+    { value: 'bandar_deylam', label: 'بندر دیلم' },
+    { value: 'bandar_deyr', label: 'بندر دیر' },
+    { value: 'asaluyeh', label: 'عسلویه' },
+    { value: 'ahram', label: 'اهرم' },
+    { value: 'kaki', label: 'کاکی' },
+    { value: 'bandar_rig', label: 'بندر ریگ' },
+    { value: 'shabankareh', label: 'شبانکاره' },
+    { value: 'delvar', label: 'دلوار' },
+    { value: 'kharg', label: 'خارک' }
+  ],
+
+  // استان چهارمحال و بختیاری
+  chaharmahal_bakhtiari: [
+    { value: 'shahr_e_kord', label: 'شهرکرد' },
+    { value: 'borujen', label: 'بروجن' },
+    { value: 'lordegan', label: 'لردگان' },
+    { value: 'farrokh_shahr', label: 'فرخ‌شهر' },
+    { value: 'farsan', label: 'فارسان' },
+    { value: 'hafshejan', label: 'هفشجان' },
+    { value: 'junqan', label: 'جونقان' },
+    { value: 'saman', label: 'سامان' },
+    { value: 'ben', label: 'بن' },
+    { value: 'ardal', label: 'اردل' },
+    { value: 'boldaji', label: 'بلداجی' },
+    { value: 'naqneh', label: 'نقنه' },
+    { value: 'gandoman', label: 'گندمان' },
+    { value: 'babaheydar', label: 'باباحیدر' },
+    { value: 'kian', label: 'کیان' }
+  ],
+
+  // استان فارس
+  fars: [
+    { value: 'shiraz', label: 'شیراز' },
+    { value: 'marvdasht', label: 'مرودشت' },
+    { value: 'jahrom', label: 'جهرم' },
+    { value: 'fasa', label: 'فسا' },
+    { value: 'kazerun', label: 'کازرون' },
+    { value: 'darab', label: 'داراب' },
+    { value: 'abadeh', label: 'آباده' },
+    { value: 'larestan', label: 'لارستان' },
+    { value: 'eqlid', label: 'اقلید' },
+    { value: 'neyriz', label: 'نی‌ریز' },
+    { value: 'estahban', label: 'استهبان' },
+    { value: 'firuzabad', label: 'فیروزآباد' },
+    { value: 'lamerd', label: 'لامرد' },
+    { value: 'khorrambid', label: 'خرم‌بید' },
+    { value: 'khonj', label: 'خنج' }
+  ],
+
+  // استان گیلان
+  gilan: [
+    { value: 'rasht', label: 'رشت' },
+    { value: 'bandar_anzali', label: 'بندر انزلی' },
+    { value: 'lahijan', label: 'لاهیجان' },
+    { value: 'talesh', label: 'تالش' },
+    { value: 'langarud', label: 'لنگرود' },
+    { value: 'soumeh_sara', label: 'صومعه‌سرا' },
+    { value: 'astara', label: 'آستارا' },
+    { value: 'astaneh_ashrafiyeh', label: 'آستانه اشرفیه' },
+    { value: 'rudsar', label: 'رودسر' },
+    { value: 'fuman', label: 'فومن' },
+    { value: 'masal', label: 'ماسال' },
+    { value: 'rezvanshahr', label: 'رضوانشهر' },
+    { value: 'siyahkal', label: 'سیاهکل' },
+    { value: 'shaft', label: 'شفت' },
+    { value: 'rudbar', label: 'رودبار' }
+  ],
+
+  // استان گلستان
+  golestan: [
+    { value: 'gorgan', label: 'گرگان' },
+    { value: 'gonbad_kavous', label: 'گنبد کاووس' },
+    { value: 'bandar_torkaman', label: 'بندر ترکمن' },
+    { value: 'aliabad_katul', label: 'علی‌آباد کتول' },
+    { value: 'aq_qala', label: 'آق‌قلا' },
+    { value: 'kordkuy', label: 'کردکوی' },
+    { value: 'azadshahr', label: 'آزادشهر' },
+    { value: 'kalaleh', label: 'کلاله' },
+    { value: 'ramian', label: 'رامیان' },
+    { value: 'minudasht', label: 'مینودشت' },
+    { value: 'gomishan', label: 'گمیشان' },
+    { value: 'maraveh_tappeh', label: 'مراوه‌تپه' },
+    { value: 'galikash', label: 'گالیکش' }
+  ],
+
+  // استان همدان
+  hamadan: [
+    { value: 'hamadan', label: 'همدان' },
+    { value: 'malayer', label: 'ملایر' },
+    { value: 'nahavand', label: 'نهاوند' },
+    { value: 'asadabad', label: 'اسدآباد' },
+    { value: 'toycerkan', label: 'تویسرکان' },
+    { value: 'kabudarahang', label: 'کبودرآهنگ' },
+    { value: 'bahar', label: 'بهار' },
+    { value: 'razan', label: 'رزن' },
+    { value: 'lalejin', label: 'لالجین' },
+    { value: 'famenin', label: 'فامنین' },
+    { value: 'samen', label: 'سامن' },
+    { value: 'qorveh_darajerdi', label: 'قروه درجزین' },
+    { value: 'goltappeh', label: 'گلتپه' },
+    { value: 'maryanaj', label: 'مریانج' },
+    { value: 'juraqan', label: 'جورقان' }
+  ],
+
+  // استان هرمزگان
+  hormozgan: [
+    { value: 'bandar_abbas', label: 'بندرعباس' },
+    { value: 'minab', label: 'میناب' },
+    { value: 'qeshm', label: 'قشم' },
+    { value: 'bandar_lengeh', label: 'بندر لنگه' },
+    { value: 'kish', label: 'کیش' },
+    { value: 'haji_abad', label: 'حاجی‌آباد' },
+    { value: 'rudan', label: 'رودان' },
+    { value: 'bastak', label: 'بستک' },
+    { value: 'bandar_khamir', label: 'بندر خمیر' },
+    { value: 'parsian', label: 'پارسیان' },
+    { value: 'bandar_jask', label: 'بندر جاسک' },
+    { value: 'abumusa', label: 'ابوموسی' },
+    { value: 'hengan', label: 'هنگام' },
+    { value: 'laft', label: 'لافت' }
+  ],
+
+  // استان ایلام
+  ilam: [
+    { value: 'ilam', label: 'ایلام' },
+    { value: 'dehloran', label: 'دهلران' },
+    { value: 'ivan', label: 'ایوان' },
+    { value: 'abdanan', label: 'آبدانان' },
+    { value: 'darreh_shahr', label: 'دره‌شهر' },
+    { value: 'mehran', label: 'مهران' },
+    { value: 'sarableh', label: 'سرابله' },
+    { value: 'arkanaz', label: 'آرکاناز' },
+    { value: 'badreh', label: 'بدره' },
+    { value: 'malekshahi', label: 'ملکشاهی' },
+    { value: 'maymeh', label: 'میمه' },
+    { value: 'sirvan', label: 'سیروان' },
+    { value: 'chavar', label: 'چوار' },
+    { value: 'eyvan', label: 'ایوان' }
+  ],
+
+  // استان اصفهان
+  isfahan: [
+    { value: 'isfahan', label: 'اصفهان' },
+    { value: 'kashan', label: 'کاشان' },
+    { value: 'khomeyni_shahr', label: 'خمینی‌شهر' },
+    { value: 'najafabad', label: 'نجف‌آباد' },
+    { value: 'shahreza', label: 'شهرضا' },
+    { value: 'mobarakeh', label: 'مبارکه' },
+    { value: 'golpayegan', label: 'گلپایگان' },
+    { value: 'fereydan', label: 'فریدن' },
+    { value: 'aran_va_bidgol', label: 'آران و بیدگل' },
+    { value: 'khomein', label: 'خمین' },
+    { value: 'shahin_shahr', label: 'شاهین‌شهر' },
+    { value: 'falavarjan', label: 'فلاورجان' },
+    { value: 'tiran', label: 'تیران' },
+    { value: 'naeen', label: 'نائین' },
+    { value: 'natanz', label: 'نطنز' }
+  ],
+
+  // استان کرمان
+  kerman: [
+    { value: 'kerman', label: 'کرمان' },
+    { value: 'sirjan', label: 'سیرجان' },
+    { value: 'rafsanjan', label: 'رفسنجان' },
+    { value: 'bam', label: 'بم' },
+    { value: 'jiroft', label: 'جیرفت' },
+    { value: 'zarand', label: 'زرند' },
+    { value: 'bardsir', label: 'بردسیر' },
+    { value: 'kahnuj', label: 'کهنوج' },
+    { value: 'anar', label: 'انار' },
+    { value: 'baft', label: 'بافت' },
+    { value: 'shahr_babak', label: 'شهر بابک' },
+    { value: 'manujan', label: 'منوجان' },
+    { value: 'rudbar_jonub', label: 'رودبار جنوب' },
+    { value: 'qaleh_ganj', label: 'قلعه گنج' },
+    { value: 'ravar', label: 'راور' }
+  ],
+
+  // استان کرمانشاه
+  kermanshah: [
+    { value: 'kermanshah', label: 'کرمانشاه' },
+    { value: 'eslamabad_e_gharb', label: 'اسلام‌آباد غرب' },
+    { value: 'javanrud', label: 'جوانرود' },
+    { value: 'kangavar', label: 'کنگاور' },
+    { value: 'paveh', label: 'پاوه' },
+    { value: 'sarpol_zahab', label: 'سرپل ذهاب' },
+    { value: 'sonqor', label: 'سنقر' },
+    { value: 'qasr_e_shirin', label: 'قصر شیرین' },
+    { value: 'gilanegharb', label: 'گیلانغرب' },
+    { value: 'harsin', label: 'هرسین' },
+    { value: 'sahneh', label: 'صحنه' },
+    { value: 'ravansar', label: 'روانسر' },
+    { value: 'dalahu', label: 'دالاهو' },
+    { value: 'salas_babajani', label: 'ثلاث باباجانی' }
+  ],
+
+  // استان خراسان شمالی
+  khorasan_north: [
+    { value: 'bojnurd', label: 'بجنورد' },
+    { value: 'esfarayen', label: 'اسفراین' },
+    { value: 'shirvan', label: 'شیروان' },
+    { value: 'ashkhaneh', label: 'آشخانه' },
+    { value: 'jajarm', label: 'جاجرم' },
+    { value: 'faruj', label: 'فاروج' },
+    { value: 'garmeh', label: 'گرمه' },
+    { value: 'raz', label: 'راز' },
+    { value: 'safiabad', label: 'صفی‌آباد' },
+    { value: 'ghanchi', label: 'قانچی' }
+  ],
+
+  // استان خراسان رضوی
+  khorasan_razavi: [
+    { value: 'mashhad', label: 'مشهد' },
+    { value: 'neyshabur', label: 'نیشابور' },
+    { value: 'sabzevar', label: 'سبزوار' },
+    { value: 'torghabeh', label: 'طرقبه' },
+    { value: 'shandiz', label: 'شاندیز' },
+    { value: 'quchan', label: 'قوچان' },
+    { value: 'torbat_e_heydarieh', label: 'تربت حیدریه' },
+    { value: 'kashmar', label: 'کاشمر' },
+    { value: 'gonabad', label: 'گناباد' },
+    { value: 'torbat_e_jam', label: 'تربت جام' },
+    { value: 'taybad', label: 'تایباد' },
+    { value: 'fariman', label: 'فریمان' },
+    { value: 'kalat', label: 'کلات' },
+    { value: 'chenaran', label: 'چناران' },
+    { value: 'sarakhs', label: 'سرخس' }
+  ],
+
+  // استان خراسان جنوبی
+  khorasan_south: [
+    { value: 'birjand', label: 'بیرجند' },
+    { value: 'qayen', label: 'قائن' },
+    { value: 'tabas', label: 'طبس' },
+    { value: 'ferdows', label: 'فردوس' },
+    { value: 'nebandan', label: 'نهبندان' },
+    { value: 'sarbisheh', label: 'سربیشه' },
+    { value: 'darmian', label: 'درمیان' },
+    { value: 'boshruyeh', label: 'بشرویه' },
+    { value: 'saraqan', label: 'سرایان' },
+    { value: 'zirkuh', label: 'زیرکوه' },
+    { value: 'khusf', label: 'خوسف' }
+  ],
+
+  // استان خوزستان
+  khuzestan: [
+    { value: 'ahvaz', label: 'اهواز' },
+    { value: 'abadan', label: 'آبادان' },
+    { value: 'khorramshahr', label: 'خرمشهر' },
+    { value: 'dezful', label: 'دزفول' },
+    { value: 'masjed_solayman', label: 'مسجد سلیمان' },
+    { value: 'shushtar', label: 'شوشتر' },
+    { value: 'bandar_mahshahr', label: 'بندر ماهشهر' },
+    { value: 'izeh', label: 'ایذه' },
+    { value: 'behbahan', label: 'بهبهان' },
+    { value: 'ramhormoz', label: 'رامهرمز' },
+    { value: 'shush', label: 'شوش' },
+    { value: 'omidiyeh', label: 'امیدیه' },
+    { value: 'andimeshk', label: 'اندیمشک' },
+    { value: 'hendijan', label: 'هندیجان' },
+    { value: 'ramshir', label: 'رامشیر' }
+  ],
+
+  // استان کهگیلویه و بویراحمد
+  kohgiluyeh_boyer_ahmad: [
+    { value: 'yasuj', label: 'یاسوج' },
+    { value: 'dehdasht', label: 'دهدشت' },
+    { value: 'dogonbadan', label: 'دوگنبدان' },
+    { value: 'likak', label: 'لیکک' },
+    { value: 'choram', label: 'چرام' },
+    { value: 'sugh', label: 'سوق' },
+    { value: 'bahmai', label: 'بهمئی' },
+    { value: 'landeh', label: 'لنده' },
+    { value: 'gachsaran', label: 'گچساران' },
+    { value: 'basht', label: 'باشت' }
+  ],
+
+  // استان کردستان
+  kurdistan: [
+    { value: 'sanandaj', label: 'سنندج' },
+    { value: 'saqqez', label: 'سقز' },
+    { value: 'marivan', label: 'مریوان' },
+    { value: 'baneh', label: 'بانه' },
+    { value: 'qorveh', label: 'قروه' },
+    { value: 'bijar', label: 'بیجار' },
+    { value: 'kamyaran', label: 'کامیاران' },
+    { value: 'divandarreh', label: 'دیواندره' },
+    { value: 'dehgolan', label: 'دهگلان' },
+    { value: 'sarwabad', label: 'سروآباد' }
+  ],
+
+  // استان لرستان
+  lorestan: [
+    { value: 'khorramabad', label: 'خرم‌آباد' },
+    { value: 'borujerd', label: 'بروجرد' },
+    { value: 'dorud', label: 'دورود' },
+    { value: 'kuhdasht', label: 'کوهدشت' },
+    { value: 'aligudarz', label: 'الیگودرز' },
+    { value: 'azna', label: 'ازنا' },
+    { value: 'nurabad', label: 'نورآباد' },
+    { value: 'poldokhtar', label: 'پلدختر' },
+    { value: 'selseleh', label: 'سلسله' },
+    { value: 'delfan', label: 'دلفان' }
+  ],
+
+  // استان مرکزی
+  markazi: [
+    { value: 'arak', label: 'اراک' },
+    { value: 'saveh', label: 'ساوه' },
+    { value: 'khomein', label: 'خمین' },
+    { value: 'mahallat', label: 'محلات' },
+    { value: 'delijan', label: 'دلیجان' },
+    { value: 'tafresh', label: 'تفرش' },
+    { value: 'ashtian', label: 'آشتیان' },
+    { value: 'shazand', label: 'شازند' },
+    { value: 'komijan', label: 'کمیجان' },
+    { value: 'zarandieh', label: 'زرندیه' },
+    { value: 'mamuniyeh', label: 'مامونیه' },
+    { value: 'ghahramankand', label: 'قهرمانکند' },
+    { value: 'khenejin', label: 'خنجین' }
+  ],
+
+  // استان مازندران
+  mazandaran: [
+    { value: 'sari', label: 'ساری' },
+    { value: 'amol', label: 'آمل' },
+    { value: 'babol', label: 'بابل' },
+    { value: 'qaemshahr', label: 'قائمشهر' },
+    { value: 'behshahr', label: 'بهشهر' },
+    { value: 'noshahr', label: 'نوشهر' },
+    { value: 'chalus', label: 'چالوس' },
+    { value: 'ramsar', label: 'رامسر' },
+    { value: 'tonekabon', label: 'تنکابن' },
+    { value: 'mahmudabad', label: 'محمودآباد' },
+    { value: 'nowshahr', label: 'نوشهر' },
+    { value: 'nur', label: 'نور' },
+    { value: 'babolkar', label: 'بابلکر' },
+    { value: 'feridonkenar', label: 'فریدونکنار' },
+    { value: 'juybar', label: 'جویبار' }
+  ],
+
+  // استان قزوین
+  qazvin: [
+    { value: 'qazvin', label: 'قزوین' },
+    { value: 'alvand', label: 'الوند' },
+    { value: 'takestan', label: 'تاکستان' },
+    { value: 'boyin_zahra', label: 'بوئین‌زهرا' },
+    { value: 'abeyek', label: 'آبیک' },
+    { value: 'shal', label: 'شال' },
+    { value: 'khoremand', label: 'خرمدشت' },
+    { value: 'avaj', label: 'آوج' },
+    { value: 'mohammadiyeh', label: 'محمدیه' },
+    { value: 'esfarvarin', label: 'اسفرورین' },
+    { value: 'danesfahan', label: 'دانسفهان' }
+  ],
+
+  // استان قم
+  qom: [
+    { value: 'qom', label: 'قم' },
+    { value: 'qanavat', label: 'قنوات' },
+    { value: 'jafariyeh', label: 'جعفریه' },
+    { value: 'kahak', label: 'کهک' },
+    { value: 'dastjerd', label: 'دستجرد' },
+    { value: 'salafchegan', label: 'سلفچگان' }
+  ],
+
+  // استان سمنان
+  semnan: [
+    { value: 'semnan', label: 'سمنان' },
+    { value: 'shahroud', label: 'شاهرود' },
+    { value: 'damghan', label: 'دامغان' },
+    { value: 'garmsar', label: 'گرمسار' },
+    { value: 'meyami', label: 'میامی' },
+    { value: 'mahdishahr', label: 'مهدیشهر' },
+    { value: 'eyvanaki', label: 'ایوانکی' },
+    { value: 'bastam', label: 'بسطام' },
+    { value: 'sorkheh', label: 'سرخه' },
+    { value: 'kohanabad', label: 'کهن‌آباد' },
+    { value: 'dibaj', label: 'دیباج' }
+  ],
+
+  // استان سیستان و بلوچستان
+  sistan_baluchestan: [
+    { value: 'zahedan', label: 'زاهدان' },
+    { value: 'zabol', label: 'زابل' },
+    { value: 'iranshahr', label: 'ایرانشهر' },
+    { value: 'chabahar', label: 'چابهار' },
+    { value: 'saravan', label: 'سراوان' },
+    { value: 'khash', label: 'خاش' },
+    { value: 'nikshahr', label: 'نیکشهر' },
+    { value: 'sarbaz', label: 'سرباز' },
+    { value: 'konarak', label: 'کنارک' },
+    { value: 'zehak', label: 'زهک' },
+    { value: 'hirmand', label: 'هیرمند' },
+    { value: 'qasr_qand', label: 'قصرقند' },
+    { value: 'dalgan', label: 'دلگان' },
+    { value: 'kalporagan', label: 'کالپوراگان' },
+    { value: 'mirabad', label: 'میرآباد' }
+  ],
+
+  // استان تهران
+  tehran: [
+    { value: 'tehran', label: 'تهران' },
+    { value: 'varamin', label: 'ورامین' },
+    { value: 'eslamshahr', label: 'اسلام‌شهر' },
+    { value: 'rey', label: 'ری' },
+    { value: 'damavand', label: 'دماوند' },
+    { value: 'pakdasht', label: 'پاکدشت' },
+    { value: 'robat_karim', label: 'رباط‌کریم' },
+    { value: 'shahriyar', label: 'شهریار' },
+    { value: 'ferdowsiyeh', label: 'فردوسیه' },
+    { value: 'malard', label: 'ملارد' },
+    { value: 'qods', label: 'قدس' },
+    { value: 'bumehen', label: 'بومهن' },
+    { value: 'pishva', label: 'پیشوا' },
+    { value: 'firuzkuh', label: 'فیروزکوه' },
+    { value: 'shemiran', label: 'شمیران' }
+  ],
+
+  // استان یزد
+  yazd: [
+    { value: 'yazd', label: 'یزد' },
+    { value: 'meybod', label: 'میبد' },
+    { value: 'ardakan', label: 'اردکان' },
+    { value: 'bafq', label: 'بافق' },
+    { value: 'taft', label: 'تفت' },
+    { value: 'abarkouh', label: 'ابرکوه' },
+    { value: 'mehriz', label: 'مهریز' },
+    { value: 'khatam', label: 'خاتم' },
+    { value: 'ashkezar', label: 'اشکذر' },
+    { value: 'zarach', label: 'زرچ' },
+    { value: 'hamidiya', label: 'حمیدیا' },
+    { value: 'anar', label: 'انار' }
+  ],
+
+  // استان زنجان
+  zanjan: [
+    { value: 'zanjan', label: 'زنجان' },
+    { value: 'abhar', label: 'ابهر' },
+    { value: 'khoramdareh', label: 'خرمدره' },
+    { value: 'qeydar', label: 'قیدار' },
+    { value: 'hidaj', label: 'هیدج' },
+    { value: 'soltaniyeh', label: 'سلطانیه' },
+    { value: 'mahneshan', label: 'ماهنشان' },
+    { value: 'ijrud', label: 'ایجرود' },
+    { value: 'tarom', label: 'طارم' },
+    { value: 'sain_qaleh', label: 'صائین‌قلعه' }
+  ]
+};

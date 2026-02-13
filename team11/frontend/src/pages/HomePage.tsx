@@ -35,7 +35,7 @@ const HomePage = () => {
 
           <Button
             variant="secondary"
-            className="flex-1 py-4 text-lg shadow-xl hover:scale-105"
+            className="flex-1 py-4 text-lg shadow-xl hover:scale-105 bg-persian-blue text-white hover:bg-forest-green"
             onClick={() => navigate('/suggest-destination')}
           >
             <i className="fa-solid fa-wand-magic-sparkles ml-3"></i>

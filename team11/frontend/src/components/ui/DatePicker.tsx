@@ -29,8 +29,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
       )}
       <InputDatePicker
         error={!!error}
-        style={{ height: '3rem' }}
-        wrapperStyle={{ height: '3rem' }}
+        style={{ height: '3.05rem', borderRadius: '1rem' }}
+        wrapperStyle={{ height: '3.05rem', borderRadius: '1rem' }}
         wrapperClassName={`
           rounded-xl border transition-all duration-300
           ${error ? 'border-red-500 bg-red-50' : 'border-gray-300 focus-within:border-persian-gold focus-within:ring-2 focus-within:ring-persian-gold/20'}
