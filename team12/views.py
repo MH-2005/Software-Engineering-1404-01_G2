@@ -26,130 +26,218 @@ def base(request):
     return render(request, f"{TEAM_NAME}/index.html")
 
 
-
-# Helper to format error responses as per OpenAPI schema
 def error_response(message, code="INVALID_PARAMETER", status=400):
-    return JsonResponse({
-        "error": {
-            "code": code,
-            "message": message
-        }
-    }, status=status)
+    return JsonResponse({"error": {"code": code, "message": message}}, status=status)
 
 @method_decorator(api_login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class ScoreCandidatePlacesView(APIView):
-    """
-    POST /team12/recommend/places/score
-    Evaluates and ranks candidate place IDs.
-    """
     def post(self, request):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
             return error_response("Invalid JSON format", "PARSE_ERROR")
 
-        # 1. Validation and Mapping (YAML uses snake_case)
+        # 1. Extract (No strict check yet)
         candidate_ids = data.get('candidate_place', [])
         style = data.get('travel_style')
         budget = data.get('budget_level')
         season = data.get('season')
         duration = data.get('trip_duration')
 
-        if not all([candidate_ids, style, budget, season, duration]):
-            return error_response("Missing required fields: candidate_place, travel_style, budget_level, season, trip_duration")
+        # candidate_place is usually mandatory for this specific endpoint
+        if not candidate_ids:
+            return JsonResponse({"scored_places": []})
 
-        # 2. Query Candidates
         places = Place.objects.filter(place_id__in=candidate_ids)
         if not places.exists():
             return JsonResponse({"scored_places": []})
 
-        # 3. Calculation
         score_map = {p.place_id: 1.0 for p in places}
-        
-        # Scoring logic using your score.py matrices
-        for p_id, val in scoreByStyle(places, style.upper()): score_map[p_id] *= val
-        for p_id, val in scoreByBudget(places, budget.upper()): score_map[p_id] *= val
-        for p_id, val in scoreBySeason(places, season.upper()): score_map[p_id] *= val
-        for p_id, val in scoreByDuration(places, duration): score_map[p_id] *= val
+        applied_any = False
 
-        # 4. Final Response Construction
+        # 2. Flexible Scoring (Skip if empty string or None)
+        
+        # --- TRAVEL STYLE ---
+        if style: 
+            style = str(style).upper()
+            if style not in styleIndex:
+                return error_response(f"Invalid travel_style: {style}. Options: {list(styleIndex.keys())}")
+            
+            applied_any = True
+            for p_id, val in scoreByStyle(places, style):
+                score_map[p_id] *= val
+
+        # --- BUDGET LEVEL ---
+        if budget:
+            budget = str(budget).upper()
+            if budget not in budgetIndex:
+                return error_response(f"Invalid budget_level: {budget}. Options: {list(budgetIndex.keys())}")
+            
+            applied_any = True
+            for p_id, val in scoreByBudget(places, budget):
+                score_map[p_id] *= val
+
+        # --- SEASON ---
+        if season:
+            season = str(season).upper()
+            if season not in seasonIndex:
+                return error_response(f"Invalid season: {season}. Options: {list(seasonIndex.keys())}")
+            
+            applied_any = True
+            for p_id, val in scoreBySeason(places, season):
+                score_map[p_id] *= val
+
+        # --- DURATION ---
+        if duration: # Handles string "5", int 5. Skips "" or None or 0
+            try:
+                dur_val = float(duration)
+                if dur_val > 0:
+                    applied_any = True
+                    for p_id, val in scoreByDuration(places, dur_val):
+                        score_map[p_id] *= val
+                else:
+                    return error_response("trip_duration must be positive")
+            except (ValueError, TypeError):
+                return error_response("trip_duration must be a number")
+
+        # 3. Final Response
         scored_places = []
         for p_id, total in score_map.items():
+            # If no filters applied, return 1.0 (neutral)
+            final_val = total if applied_any else 1.0
             scored_places.append({
                 "place_id": p_id,
-                "score": round(total, 4),
-                "ai_reason": "با توجه به سبک سفر و بودجه شما، این مکان در این فصل بسیار توصیه می‌شود."
+                "score": round(final_val, 4),
+                "ai_reason": "Based on your provided preferences." if applied_any else "No preferences provided."
             })
 
         scored_places.sort(key=lambda x: x['score'], reverse=True)
         return JsonResponse({"scored_places": scored_places})
 
+
 @method_decorator(api_login_required, name='dispatch')
 class SuggestRegionsView(APIView):
-    """
-    GET /team12/recommend/regions
-    Suggests best regions based on season and budget.
-    """
     def get(self, request):
-        # YAML specifies these as query parameters
         season = request.GET.get('season')
         budget = request.GET.get('budget_level')
-        limit = int(request.GET.get('limit', 10))
+        limit_param = request.GET.get('limit', 10)
+        
+        try:
+            limit = int(limit_param)
+        except ValueError:
+            limit = 10
 
-        if not season or not budget:
-            return error_response("Parameters 'season' and 'budget_level' are required.")
-
-        # Logic: Average seasonal/budget score for all places in a region
         regions = Region.objects.all()
         destinations = []
+        
+        # Validations (Only if fields are present)
+        if season:
+            season = season.upper()
+            if season not in seasonIndex:
+                return error_response("Invalid season")
+                
+        if budget:
+            budget = budget.upper()
+            if budget not in budgetIndex:
+                return error_response("Invalid budget_level")
 
         for region in regions:
             places = region.places.all()
             if not places.exists(): continue
             
-            # Simple averaging logic for example
-            avg_score = sum([1.0 for _ in places]) / places.count() # Replace with matrix logic if needed
-            
-            destinations.append({
-                "region_id": region.region_id,
-                "region_name": region.region_name,
-                "match_score": round(avg_score, 4),
-                "image_url": "https://api.core-domain.com/static/region.jpg",
-                "ai_reason": f"این منطقه در فصل {season} برای بودجه {budget} مناسب است."
-            })
+            # Start score at 1.0
+            region_score = 1.0
+            applied_any = False
+
+            # --- Score by Season (Average of all places) ---
+            if season:
+                applied_any = True
+                total_s = 0
+                target_s_idx = seasonIndex[season]
+                for p in places:
+                    p_s_idx = seasonIndex.get(p.season.upper(), 0)
+                    total_s += seasonMtx[target_s_idx][p_s_idx]
+                region_score *= (total_s / places.count())
+
+            # --- Score by Budget (Average of all places) ---
+            if budget:
+                applied_any = True
+                total_b = 0
+                target_b_idx = budgetIndex[budget]
+                for p in places:
+                    p_b_idx = budgetIndex.get(p.budget_level.upper(), 0)
+                    total_b += budgetMtx[target_b_idx][p_b_idx]
+                region_score *= (total_b / places.count())
+
+            # Only add to results if we actually calculated something (or return all if you prefer)
+            if applied_any:
+                destinations.append({
+                    "region_id": region.region_id,
+                    "region_name": region.region_name,
+                    "match_score": round(region_score, 4),
+                    "ai_reason": f"Recommended based on {season if season else ''} {budget if budget else ''}"
+                })
 
         destinations.sort(key=lambda x: x['match_score'], reverse=True)
+        
+        # If no filters were provided, implies return nothing or return all (empty list is safer for strict logic)
         return JsonResponse({"destinations": destinations[:limit]})
+
 
 @method_decorator(api_login_required, name='dispatch')
 class SuggestPlacesInRegionView(APIView):
-    """
-    GET /team12/recommend/regions/{region_id}/places
-    Scores all places inside a specific region.
-    """
     def get(self, request, region_id):
-        # Query Params
+        # Extract params
         style = request.GET.get('travel_style')
         budget = request.GET.get('budget_level')
         season = request.GET.get('season')
         duration = request.GET.get('trip_duration')
-        limit = int(request.GET.get('limit', 10))
+        
+        try:
+            limit = int(request.GET.get('limit', 10))
+        except ValueError:
+            limit = 10
 
         places = Place.objects.filter(region__region_id=region_id)
         if not places.exists():
-            return error_response("Region not found or has no places", "NOT_FOUND", status=404)
+            # If region invalid or empty, return 404 or empty list
+            return error_response("Region not found", "NOT_FOUND", status=404)
 
-        # Scoring Logic (Reusing your matrix logic)
         score_map = {p.place_id: 1.0 for p in places}
-        # ... (Call your scoreBy functions here) ...
+        applied_any = False
+
+        # --- Reusing Flexible Logic ---
+        if style:
+            applied_any = True
+            if style.upper() in styleIndex:
+                for p_id, val in scoreByStyle(places, style.upper()): score_map[p_id] *= val
+        
+        if budget:
+            applied_any = True
+            if budget.upper() in budgetIndex:
+                for p_id, val in scoreByBudget(places, budget.upper()): score_map[p_id] *= val
+
+        if season:
+            applied_any = True
+            if season.upper() in seasonIndex:
+                for p_id, val in scoreBySeason(places, season.upper()): score_map[p_id] *= val
+
+        if duration:
+            try:
+                d_val = float(duration)
+                if d_val > 0:
+                    applied_any = True
+                    for p_id, val in scoreByDuration(places, d_val): score_map[p_id] *= val
+            except: pass # Ignore bad duration if filtering loosely
 
         scored_places = []
         for p_id, total in score_map.items():
+            final_val = total if applied_any else 1.0
             scored_places.append({
                 "place_id": p_id,
-                "score": round(total, 4),
-                "ai_reason": "جاذبه برتر در این منطقه با توجه به معیارهای شما."
+                "score": round(final_val, 4),
+                "ai_reason": "Recommended place in this region."
             })
 
         scored_places.sort(key=lambda x: x['score'], reverse=True)
