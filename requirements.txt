@@ -1,12 +1,23 @@
 Django==4.2.27
-PyJWT==2.11.0
-django-environ==0.12.0
-django-cors-headers==4.9.0
-gunicorn==25.0.3
-whitenoise==6.11.0
-djangorestframework==3.16.1
-google-genai==1.0.0
-elasticsearch==8.12.1
-celery==5.4.0
-redis==5.0.8
-flower==2.0.1
+PyJWT
+django-environ
+django-cors-headers
+mysqlclient
+PyMySQL
+gunicorn
+whitenoise
+djangorestframework>=3.14.0
+
+-r team1/requirements.txt
+-r team2/requirements.txt
+-r team3/requirements.txt
+-r team4/requirements.txt
+-r team5/requirements.txt
+-r team6/requirements.txt
+-r team7/requirements.txt
+-r team8/requirements.txt
+-r team9/requirements.txt
+-r team10/requirements.txt
+-r team11/requirements.txt
+-r team12/requirements.txt
+-r team13/requirements.txt
