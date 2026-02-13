@@ -12,7 +12,7 @@ import json
 
 TEAM_NAME = "team12"
 
-@api_login_required
+# @api_login_required
 @require_http_methods(["GET"])
 def ping(request):
     return JsonResponse({"team": TEAM_NAME, "ok": True})
@@ -23,7 +23,7 @@ def base(request):
 def error_response(message, code="INVALID_PARAMETER", status=400):
     return JsonResponse({"error": {"code": code, "message": message}}, status=status)
 
-@method_decorator(api_login_required, name='dispatch')
+# @method_decorator(api_login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class ScoreCandidatePlacesView(APIView):
     def post(self, request):

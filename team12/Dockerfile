@@ -11,14 +11,13 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
   && rm -rf /var/lib/apt/lists/*
 
-# Non-root user
-RUN useradd -m -u 10001 appuser \
- && mkdir -p /app/staticfiles \
- && chown -R appuser:appuser /app
+COPY requirements.txt /app/
+COPY team12/requirements.txt /app/team12_requirements.txt
 
-USER appuser
-
-COPY requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip && pip install -r /app/requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r /app/requirements.txt && \
+    pip install -r /app/team12_requirements.txt
 
 COPY . /app/
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"]
