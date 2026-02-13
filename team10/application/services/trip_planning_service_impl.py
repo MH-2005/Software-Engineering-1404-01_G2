@@ -208,7 +208,7 @@ class TripPlanningServiceImpl(TripPlanningService):
             raise ValueError(f"No hotel found in region {region_id}")
 
         # Calculate number of nights
-        duration_days = (end_date - start_date).days
+        duration_days = (end_date - start_date).days + 1
         
         # Create hotel schedule
         HotelSchedule.objects.create(
@@ -934,7 +934,7 @@ class TripPlanningServiceImpl(TripPlanningService):
         result = []
         for trip in trips:
             req = trip.requirements
-            days = (req.end_at - req.start_at).days if req.end_at and req.start_at else 0
+            days = (req.end_at - req.start_at).days + 1 if req.end_at and req.start_at else 0
             display_status, display_status_label_fa = self._compute_display_status(
                 req.start_at,
                 req.end_at

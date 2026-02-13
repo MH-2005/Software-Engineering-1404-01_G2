@@ -29,4 +29,4 @@ class TripRequirements:
 
     def get_duration_days(self) -> int:
         """Calculate the duration of the trip in days."""
-        return (self.end_at - self.start_at).days
+        return (self.end_at - self.start_at).days + 1

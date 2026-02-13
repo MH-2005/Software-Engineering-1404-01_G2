@@ -186,7 +186,7 @@ def home(request):
         trips = []
         for t in trips_qs:
             req = t.requirements
-            days = (req.end_at - req.start_at).days if req.end_at and req.start_at else 0
+            days = (req.end_at - req.start_at).days + 1 if req.end_at and req.start_at else 0
             styles = list(req.constraints.values_list('tag', flat=True))
             trips.append(
                 {
@@ -354,7 +354,7 @@ def trip_detail(request, trip_id: int):
         if not trip:
             raise Http404()
         req = trip.requirements
-        days_count = (req.end_at - req.start_at).days if req.end_at and req.start_at else 0
+        days_count = (req.end_at - req.start_at).days + 1 if req.end_at and req.start_at else 0
         
         # Group activities by day
         daily_plans = list(trip.daily_plans.all().order_by('start_at'))
