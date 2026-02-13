@@ -48,6 +48,19 @@ def ok(request):
     })
 
 
+def _check_trip_ownership(request, trip) -> bool:
+    """
+    Check if the current user owns the trip.
+    Returns True if the trip has no owner (guest trip) or if the user is the owner.
+    """
+    if trip.user_id is None:
+        return True  # Guest trip, anyone can modify
+    user_id = getattr(request, 'jwt_user_id', None)
+    if user_id is None:
+        return True  # No auth middleware, allow (development mode)
+    return trip.user_id == user_id
+
+
 class TripViewSet(viewsets.ViewSet):
     """API endpoints for Trip management"""
 
@@ -111,6 +124,20 @@ class TripViewSet(viewsets.ViewSet):
 
     def _update_trip(self, request, pk, partial=False):
         """Helper method for update and partial_update"""
+        # Ownership check
+        trip = TripService.get_trip_detail(int(pk))
+        if not trip:
+            return Response(
+                {"error": "Trip not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        if not _check_trip_ownership(request, trip):
+            return Response(
+                {"error": "You do not have permission to modify this trip",
+                 "error_fa": "شما اجازه ویرایش این سفر را ندارید"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         serializer = TripCreateUpdateSerializer(
             data=request.data, partial=partial)
 
@@ -120,25 +147,27 @@ class TripViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        trip = TripService.update_trip(int(pk), serializer.validated_data)
+        updated_trip = TripService.update_trip(int(pk), serializer.validated_data)
+        return Response(TripDetailSerializer(updated_trip).data)
 
+    def destroy(self, request, pk=None):
+        """DELETE /api/trips/{id}/ - Delete a trip"""
+        # Ownership check
+        trip = TripService.get_trip_detail(int(pk))
         if not trip:
             return Response(
                 {"error": "Trip not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
+        if not _check_trip_ownership(request, trip):
+            return Response(
+                {"error": "You do not have permission to delete this trip",
+                 "error_fa": "شما اجازه حذف این سفر را ندارید"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        return Response(TripDetailSerializer(trip).data)
-
-    def destroy(self, request, pk=None):
-        """DELETE /api/trips/{id}/ - Delete a trip"""
-        if TripService.delete_trip(int(pk)):
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response(
-            {"error": "Trip not found"},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        TripService.delete_trip(int(pk))
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
     @action(detail=False, methods=['post'], url_path='generate')
