@@ -94,8 +94,8 @@ def scoreByDuration(places, targetDuration):
     
     for place in places:
         placeId = place.place_id
-        deltaT = targetDuration - place.duration
-        score = (tanh(deltaT) + 1)/2
+        diff = abs(targetDuration - place.duration)
+        score = 1.0 / (1.0 + diff) 
         result.append((placeId, max(score, 0.01)))
 
     return result
@@ -104,10 +104,6 @@ def scoreByDuration(places, targetDuration):
 def scoreByBaseRate(places):
     result = []
     for place in places:
-        score = max(place.base_rate / 5.0, 0.1)
+        score = max(place.base_rate / 5.0, 0.3)
         result.append((place.place_id, score))
     return result
-
-
-    
-
