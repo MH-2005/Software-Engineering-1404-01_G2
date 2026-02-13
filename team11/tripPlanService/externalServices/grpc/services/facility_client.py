@@ -193,134 +193,170 @@ class FacilityClient:
             categories: Optional[List[str]],
             limit: int
     ) -> List[Dict]:
-        """Mock data for development - replace with actual gRPC calls"""
-        mock_places = [
+        """Mock data for development - generates places for any province/city"""
+        location = city if city else province
+
+        # Template places that adapt to any location
+        mock_templates = [
             {
-                'id': 'place_001',
-                'title': 'میدان نقش جهان',
+                'id': f'mock_hist_1_{province}',
+                'title': f'بنای تاریخی {location}',
                 'category': 'HISTORICAL',
-                'address': 'اصفهان، میدان نقش جهان',
-                'lat': 32.6546,
-                'lng': 51.6777,
+                'address': f'{province}، {location}',
+                'lat': 32.65, 'lng': 51.67,
                 'entry_fee': 200000,
                 'price_tier': 'BUDGET',
-                'description': 'یکی از بزرگترین میدان‌های جهان',
+                'description': f'بنای تاریخی مشهور در {location}',
                 'images': [],
-                'opening_hours': {'daily': '08:00-22:00'},
-                'rating': 4.8,
-                'review_count': 1250
+                'opening_hours': {'daily': '08:00-18:00'},
+                'rating': 4.5, 'review_count': 500
             },
             {
-                'id': 'place_002',
-                'title': 'مسجد شیخ لطف الله',
+                'id': f'mock_hist_2_{province}',
+                'title': f'مسجد جامع {location}',
                 'category': 'RELIGIOUS',
-                'address': 'اصفهان، میدان نقش جهان',
-                'lat': 32.6565,
-                'lng': 51.6785,
-                'entry_fee': 500000,
-                'price_tier': 'MODERATE',
-                'description': 'شاهکار معماری دوران صفوی',
-                'images': [],
-                'opening_hours': {'daily': '09:00-17:00'},
-                'rating': 4.9,
-                'review_count': 980
-            },
-            {
-                'id': 'place_003',
-                'title': 'رستوران سنتی شاهرزاد',
-                'category': 'DINING',
-                'address': 'اصفهان، خیابان چهارباغ',
-                'lat': 32.6543,
-                'lng': 51.6724,
-                'entry_fee': 0,
-                'price_tier': 'MODERATE',
-                'description': 'رستوران سنتی با غذاهای محلی',
-                'images': [],
-                'opening_hours': {'daily': '12:00-23:00'},
-                'rating': 4.5,
-                'review_count': 450
-            },
-            {
-                'id': 'hotel_001',
-                'title': 'هتل عباسی',
-                'category': 'STAY',
-                'address': 'اصفهان، خیابان چهارباغ',
-                'lat': 32.6565,
-                'lng': 51.6750,
-                'entry_fee': 5000000,
-                'price_tier': 'LUXURY',
-                'description': 'هتل تاریخی 5 ستاره',
-                'images': [],
-                'opening_hours': {'24/7': True},
-                'rating': 4.7,
-                'review_count': 820
-            },
-            {
-                'id': 'place_004',
-                'title': 'پل سی‌وسه‌پل',
-                'category': 'HISTORICAL',
-                'address': 'اصفهان، زاینده رود',
-                'lat': 32.6479,
-                'lng': 51.6698,
+                'address': f'{province}، {location}',
+                'lat': 32.66, 'lng': 51.68,
                 'entry_fee': 0,
                 'price_tier': 'FREE',
-                'description': 'پل تاریخی دوران صفوی',
+                'description': f'مسجد تاریخی {location}',
                 'images': [],
-                'opening_hours': {'24/7': True},
-                'rating': 4.8,
-                'review_count': 1520
+                'opening_hours': {'daily': '06:00-21:00'},
+                'rating': 4.7, 'review_count': 800
             },
             {
-                'id': 'place_005',
-                'title': 'باغ چهلستون',
+                'id': f'mock_cult_1_{province}',
+                'title': f'موزه {location}',
                 'category': 'CULTURAL',
-                'address': 'اصفهان، خیابان استانداری',
-                'lat': 32.6612,
-                'lng': 51.6697,
+                'address': f'{province}، {location}',
+                'lat': 32.67, 'lng': 51.69,
                 'entry_fee': 150000,
                 'price_tier': 'BUDGET',
-                'description': 'کاخ موزه با باغ زیبا',
+                'description': f'موزه فرهنگی و هنری {location}',
                 'images': [],
-                'opening_hours': {'daily': '08:30-18:00'},
-                'rating': 4.6,
-                'review_count': 750
+                'opening_hours': {'daily': '09:00-17:00'},
+                'rating': 4.4, 'review_count': 350
             },
             {
-                'id': 'restaurant_001',
-                'title': 'رستوران هتل عباسی',
+                'id': f'mock_nature_1_{province}',
+                'title': f'پارک طبیعت {location}',
+                'category': 'NATURAL',
+                'address': f'{province}، {location}',
+                'lat': 32.64, 'lng': 51.66,
+                'entry_fee': 50000,
+                'price_tier': 'BUDGET',
+                'description': f'فضای سبز و طبیعی {location}',
+                'images': [],
+                'opening_hours': {'daily': '07:00-20:00'},
+                'rating': 4.3, 'review_count': 600
+            },
+            {
+                'id': f'mock_dining_1_{province}',
+                'title': f'رستوران سنتی {location}',
                 'category': 'DINING',
-                'address': 'اصفهان، هتل عباسی',
-                'lat': 32.6570,
-                'lng': 51.6755,
+                'address': f'{province}، {location}',
+                'lat': 32.65, 'lng': 51.67,
                 'entry_fee': 0,
-                'price_tier': 'EXPENSIVE',
-                'description': 'رستوران لوکس با غذاهای بین‌المللی',
+                'price_tier': 'MODERATE',
+                'description': f'رستوران سنتی با غذاهای محلی {location}',
                 'images': [],
-                'opening_hours': {'daily': '07:00-23:00'},
-                'rating': 4.6,
-                'review_count': 320
+                'opening_hours': {'daily': '12:00-23:00'},
+                'rating': 4.5, 'review_count': 400
             },
             {
-                'id': 'restaurant_002',
-                'title': 'کافه آرت اصفهان',
+                'id': f'mock_dining_2_{province}',
+                'title': f'کافه {location}',
                 'category': 'DINING',
-                'address': 'اصفهان، خیابان چهارباغ',
-                'lat': 32.6540,
-                'lng': 51.6730,
+                'address': f'{province}، {location}',
+                'lat': 32.66, 'lng': 51.68,
                 'entry_fee': 0,
                 'price_tier': 'BUDGET',
-                'description': 'کافه هنری با فضای دنج',
+                'description': f'کافه دنج در {location}',
                 'images': [],
                 'opening_hours': {'daily': '10:00-23:00'},
-                'rating': 4.3,
-                'review_count': 280
+                'rating': 4.2, 'review_count': 250
+            },
+            {
+                'id': f'mock_stay_1_{province}',
+                'title': f'هتل {location}',
+                'category': 'STAY',
+                'address': f'{province}، {location}',
+                'lat': 32.65, 'lng': 51.67,
+                'entry_fee': 3000000,
+                'price_tier': 'MODERATE',
+                'description': f'اقامتگاه مناسب در {location}',
+                'images': [],
+                'opening_hours': {'24/7': True},
+                'rating': 4.3, 'review_count': 300
+            },
+            {
+                'id': f'mock_rec_1_{province}',
+                'title': f'مرکز تفریحی {location}',
+                'category': 'RECREATIONAL',
+                'address': f'{province}، {location}',
+                'lat': 32.66, 'lng': 51.69,
+                'entry_fee': 100000,
+                'price_tier': 'BUDGET',
+                'description': f'مرکز تفریحی و سرگرمی {location}',
+                'images': [],
+                'opening_hours': {'daily': '10:00-22:00'},
+                'rating': 4.1, 'review_count': 200
+            },
+            {
+                'id': f'mock_hist_3_{province}',
+                'title': f'قلعه تاریخی {location}',
+                'category': 'HISTORICAL',
+                'address': f'{province}، {location}',
+                'lat': 32.63, 'lng': 51.65,
+                'entry_fee': 100000,
+                'price_tier': 'BUDGET',
+                'description': f'قلعه باستانی در نزدیکی {location}',
+                'images': [],
+                'opening_hours': {'daily': '08:00-17:00'},
+                'rating': 4.4, 'review_count': 350
+            },
+            {
+                'id': f'mock_dining_3_{province}',
+                'title': f'فست‌فود {location}',
+                'category': 'DINING',
+                'address': f'{province}، {location}',
+                'lat': 32.65, 'lng': 51.68,
+                'entry_fee': 0,
+                'price_tier': 'BUDGET',
+                'description': f'فست‌فود محبوب {location}',
+                'images': [],
+                'opening_hours': {'daily': '11:00-00:00'},
+                'rating': 4.0, 'review_count': 180
+            },
+            {
+                'id': f'mock_cult_2_{province}',
+                'title': f'بازار سنتی {location}',
+                'category': 'CULTURAL',
+                'address': f'{province}، {location}',
+                'lat': 32.66, 'lng': 51.67,
+                'entry_fee': 0,
+                'price_tier': 'FREE',
+                'description': f'بازار سنتی و صنایع دستی {location}',
+                'images': [],
+                'opening_hours': {'daily': '09:00-20:00'},
+                'rating': 4.6, 'review_count': 700
+            },
+            {
+                'id': f'mock_nature_2_{province}',
+                'title': f'کوهستان {location}',
+                'category': 'NATURAL',
+                'address': f'{province}، {location}',
+                'lat': 32.62, 'lng': 51.64,
+                'entry_fee': 0,
+                'price_tier': 'FREE',
+                'description': f'مسیر کوهنوردی در {location}',
+                'images': [],
+                'opening_hours': {'24/7': True},
+                'rating': 4.5, 'review_count': 400
             },
         ]
 
-        # Filter by province/city
-        filtered = [p for p in mock_places if province in p['address']]
-        if city:
-            filtered = [p for p in filtered if city in p['address']]
+        filtered = mock_templates
 
         # Filter by categories
         if categories:
