@@ -20,17 +20,17 @@ class Place(models.Model):
         ('SPRING', 'Spring'), ('SUMMER', 'Summer'), ('FALL', 'Fall'), ('WINTER', 'Winter')
     ]
 
-    place_id = models.CharField(max_length=255, primary_key=True, unique=True)
+    place_id = models.CharField(max_length=100, unique=True)
     place_name = models.CharField(max_length=255)
+    budget_level = models.CharField(max_length=20, choices=BUDGET_CHOICES)
+    travel_style = models.CharField(max_length=20, choices=STYLE_CHOICES)
+    duration = models.IntegerField()
+    season = models.CharField(max_length=20, choices=SEASON_CHOICES)
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='places', null=True)
-    category = models.CharField(max_length=100, blank=True, null=True)
-    base_score = models.FloatField(max_digits=3, decimal_places=2, default=1.0)
-    wiki_summary = models.TextField(blank=True, null=True)
-    ai_tags = models.JSONField(default=dict, blank=True, null=True)  # {"tag": "value"}
-    ai_suitability_scores = models.JSONField(default=dict, blank=True, null=True)  # {"SINGLE": 0.8, "COUPLE": 0.6, ...}
-    ai_reasoning_base = models.TextField(blank=True, null=True)  # Explanation for the scores    
     image_url = models.URLField(blank=True, null=True)
-    
+
+    ai_reason = models.TextField(blank=True, null=True)
+
     def __str__(self):
         return self.place_name
 

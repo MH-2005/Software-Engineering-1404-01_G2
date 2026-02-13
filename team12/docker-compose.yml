@@ -9,6 +9,7 @@ services:
       - CORE_BASE_URL=http://core:8000
     networks:
       - app404
+<<<<<<< HEAD
     depends_on:
       - frontend
       - backend
@@ -36,21 +37,18 @@ services:
         condition: service_healthy
     networks:
       - app404
+=======
+>>>>>>> b262acdee6bee2c1e0c132d1ffca5e7ce6a32a70
 
   postgres:
     image: postgis/postgis:16-3.4-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${TEAM8_POSTGRES_DB}
-      POSTGRES_USER: ${TEAM8_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${TEAM8_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${TEAM12_POSTGRES_DB:-team12_db}
+      POSTGRES_USER: ${TEAM12_POSTGRES_USER:-team12_user}
+      POSTGRES_PASSWORD: ${TEAM12_POSTGRES_PASSWORD:-team12_pass}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${TEAM8_POSTGRES_USER} -d ${TEAM8_POSTGRES_DB}"]
-      interval: 5s
-      timeout: 3s
-      retries: 15
     networks:
       - app404
 
