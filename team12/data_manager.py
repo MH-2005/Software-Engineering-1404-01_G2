@@ -83,3 +83,9 @@ def get_or_enrich_places(candidate_place_ids):
             ai_reason=ai_data.get("ai_reason") or "مقصد جذاب برای سفر"
         )
         new_places.append(new_place)
+
+
+    if new_places:
+        Place.objects.bulk_create(new_places)
+
+    return Place.objects.filter(place_id__in=candidate_place_ids)
