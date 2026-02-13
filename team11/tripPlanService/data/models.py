@@ -77,7 +77,8 @@ class Trip(models.Model):
         null=True,
         blank=True,
         related_name='team11_trips',
-        db_column='user_id'
+        db_column='user_id',
+        db_constraint=False,  # Users live in core DB, not microservice DB
     )
     copied_from_trip = models.ForeignKey(
         'self',
@@ -415,7 +416,8 @@ class UserMedia(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='team11_media',
-        db_column='user_id'
+        db_column='user_id',
+        db_constraint=False,  # Users live in core DB, not microservice DB
     )
     media_url = models.URLField(max_length=500)
     caption = models.CharField(max_length=500, blank=True)
