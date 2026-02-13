@@ -2,9 +2,18 @@ import os
 import json
 import google.generativeai as genai
 
-api_key = "AIzaSyDj6veF4073Tyz16phGyD7Ckp183jAIcpg"
+api_key = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-1.5-flash')
+
+safety_settings = [
+    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+]
+
+model = genai.GenerativeModel('gemini-flash-latest', safety_settings=safety_settings)
+
 
 def generate_ai_metadata_for_place(place_id, wiki_summary, wiki_tags):
     prompt = f"""
@@ -37,12 +46,21 @@ def generate_ai_metadata_for_place(place_id, wiki_summary, wiki_tags):
     try:
         response = model.generate_content(prompt)
         text = response.text.strip()
+
+        print(f"\n--- RAW AI RESPONSE for {place_id} ---", flush=True)
+        print(text, flush=True)
+        print("--------------------------------------\n", flush=True)
+
         if text.startswith("```json"):
-            text = text[7:-3].strip()
+            text = text.replace("```json", "").replace("```", "").strip()
         elif text.startswith("```"):
-            text = text[3:-3].strip()
+            text = text.replace("```", "").strip()
+
         return json.loads(text)
-    except Exception:
+
+    except Exception as e:
+        print(f"\n❌ AI FATAL ERROR for {place_id}: {str(e)}\n", flush=True)
+
         return {
             "region_id": "unknown",
             "region_name": "نامشخص",
