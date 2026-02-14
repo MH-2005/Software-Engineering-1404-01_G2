@@ -4,20 +4,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group 12 - Recommendation Service</title>
+    <title>موتور پیشنهادگر هوشمند | ایران‌نما</title>
     <link rel="stylesheet" href="{% static 'team12/styles/style.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Recommendation Service</h1>
-    <h3>پیاده‌سازی توسط گروه ۱۲ (Strangers)</h3>
-    <hr style="width: 50%; margin: 20px auto; opacity: 0.3;">
 
-    <div style="border: 2px dashed #ccc; padding: 50px; border-radius: 10px; margin: 20px 0;">
-        <p>محل قرارگیری رابط کاربری میکرو سرویس</p>
-        <p>(Microservice UI Placeholder)</p>
+    <div class="bg-pattern"></div>
+
+    <div class="app-wrapper">
+        <header class="page-header">
+            <div class="logo-wrapper">
+                <i class="fa-solid fa-leaf"></i>
+                <h1 class="page-title">موتور هوشمند پیشنهادگر</h1>
+            </div>
+            <p class="page-subtitle">سرویس‌های مبتنی بر مدل‌های زبانی (LLM) توسعه‌یافته توسط گروه ۱۲</p>
+        </header>
+
+        <div class="grid-top">
+
+            <div class="glass-card">
+                <div class="card-heading">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    کشف مقاصد برتر
+                </div>
+                <p class="card-text">استخراج مناطق و شهرهای پیشنهادی بر اساس تحلیل رفتار کاربران و شاخص‌های کلان گردشگری در سامانه.</p>
+
+                <button class="action-btn btn-accent" onclick="runRegions()">
+                    <i class="fa-solid fa-bolt"></i> پردازش مناطق
+                </button>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-heading">
+                    <i class="fa-solid fa-magnifying-glass-location"></i>
+                    تحلیل موجودیت‌های شهری
+                </div>
+                <p class="card-text">بررسی و استخراج لیست جاذبه‌های گردشگری ارزیابی شده در یک منطقه جغرافیایی خاص.</p>
+
+                <div class="input-group">
+                    <label class="input-label">شناسه لاتین منطقه</label>
+                    <input type="text" id="valRegion" class="custom-input ltr-dir" placeholder="e.g., tehran, isfahan">
+                </div>
+
+                <button class="action-btn btn-primary" onclick="runRegionPlaces()">
+                    <i class="fa-solid fa-filter"></i> جستجو و تحلیل
+                </button>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-heading">
+                    <i class="fa-solid fa-brain"></i>
+                    ارزیابی و رتبه‌بندی شناختی
+                </div>
+                <p class="card-text">پالایش کاندیداها و تخصیص امتیاز هوشمند بر اساس ویژگی‌های اختصاصی کاربر.</p>
+
+                <div class="two-cols">
+                    <div class="input-group">
+                        <label class="input-label">سبک سفر</label>
+                        <select id="valStyle" class="custom-input">
+                            <option value="FAMILY">خانوادگی</option>
+                            <option value="SOLO">انفرادی</option>
+                            <option value="COUPLE">زوج</option>
+                            <option value="BUSINESS">کاری</option>
+                            <option value="FRIENDS">دوستانه</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">سطح بودجه</label>
+                        <select id="valBudget" class="custom-input">
+                            <option value="MODERATE">متوسط</option>
+                            <option value="ECONOMY">اقتصادی</option>
+                            <option value="LUXURY">لوکس</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">فصل</label>
+                        <select id="valSeason" class="custom-input">
+                            <option value="SPRING">بهار</option>
+                            <option value="SUMMER">تابستان</option>
+                            <option value="FALL">پاییز</option>
+                            <option value="WINTER">زمستان</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">مدت (روز)</label>
+                        <input type="number" id="valDuration" class="custom-input ltr-dir" value="3" min="1">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">شناسه مقاصد کاندید (جدا شده با کاما)</label>
+                    <textarea id="valIds" class="custom-input ltr-dir" rows="2">tehran-milad-tower, isfahan-si-o-se-pol, shiraz-hafezieh</textarea>
+                </div>
+
+                <button class="action-btn btn-primary" onclick="runScoring()">
+                    <i class="fa-solid fa-ranking-star"></i> رتبه‌بندی هوشمند
+                </button>
+            </div>
+
+        </div>
+
+        <div class="glass-card results-panel">
+            <div class="card-heading">
+                <i class="fa-solid fa-server"></i>
+                خروجی پردازشگر هوشمند
+            </div>
+            <div id="outputArea">
+                <div class="sys-message">
+                    <i class="fa-solid fa-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+                    جهت دریافت داده‌ها، یکی از فرآیندهای بالا را اجرا نمایید.
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="/" class="action-btn btn-outline">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> بازگشت به داشبورد مرکزی
+            </a>
+        </div>
     </div>
 
-    <a href="/" class="back-btn"> بازگشت به داشبورد اصلی</a>
+    <script>
+        const routeBase = '/team12';
+        const display = document.getElementById('outputArea');
+
+        function updateState(msg, isProcessing = false) {
+            display.innerHTML = `
+                <div class="sys-message ${isProcessing ? 'active-loader' : ''}">
+                    <i class="fa-solid ${isProcessing ? 'fa-circle-notch' : 'fa-circle-exclamation'}"></i>
+                    ${msg}
+                </div>
+            `;
+        }
+
+        function buildOutput(items, mode) {
+            if (!items || !items.length) {
+                updateState("داده‌ای منطبق با درخواست شما در سیستم ثبت نشده است.");
+                return;
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'results-grid';
+
+            items.forEach(obj => {
+                const isReg = mode === 'region';
+                const strName = isReg ? obj.region_name : (obj.place_id || '').replace(/-/g, ' ').toUpperCase();
+                const numScore = isReg ? obj.match_score : obj.score;
+                const urlImg = obj.cover_image && !obj.cover_image.includes('unknown') ? obj.cover_image : `https://source.unsplash.com/500x300/?iran,${strName}`;
+
+                wrapper.innerHTML += `
+                    <div class="result-item">
+                        ${isReg ? `<img src="${urlImg}" class="result-pic" onerror="this.style.display='none'">` : ''}
+                        <div class="result-info">
+                            <div class="result-top">
+                                <span class="result-name">${strName}</span>
+                                <span class="result-score">${Math.round(numScore * 100)}%</span>
+                            </div>
+                            ${!isReg ? `<span class="result-id">${obj.place_id}</span>` : ''}
+                            <div class="result-ai">${obj.ai_reason}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            display.innerHTML = '';
+            display.appendChild(wrapper);
+        }
+
+        async function runRegions() {
+            updateState("در حال تبادل داده با هسته مرکزی...", true);
+            try {
+                const res = await fetch(`${routeBase}/recommend/regions/`);
+                const json = await res.json();
+                if(json.destinations) buildOutput(json.destinations, 'region');
+                else updateState("فرمت پاسخ دریافتی نامعتبر است.");
+            } catch (e) { updateState("خطا در برقراری ارتباط پایدار با سرویس‌دهنده."); }
+        }
+
+        async function runRegionPlaces() {
+            const rid = document.getElementById('valRegion').value.trim();
+            if (!rid) { alert("وارد کردن شناسه منطقه الزامی است."); return; }
+
+            updateState("در حال استخراج اطلاعات از پایگاه داده...", true);
+            try {
+                const res = await fetch(`${routeBase}/recommend/regions/${rid}/places/`);
+                if (res.status === 404) { updateState("شناسه درخواستی در سامانه موجود نیست."); return; }
+                const json = await res.json();
+                if(json.scored_places) buildOutput(json.scored_places, 'place');
+                else updateState("فرمت پاسخ دریافتی نامعتبر است.");
+            } catch (e) { updateState("خطا در برقراری ارتباط پایدار با سرویس‌دهنده."); }
+        }
+
+        async function runScoring() {
+            const rawIds = document.getElementById('valIds').value;
+            const arrIds = rawIds.split(',').map(x => x.trim()).filter(x => x);
+            if (!arrIds.length) { alert("لیست مقاصد درخواستی خالی است."); return; }
+
+            const dataPacket = {
+                candidate_place_ids: arrIds,
+                travel_style: document.getElementById('valStyle').value,
+                budget_level: document.getElementById('valBudget').value,
+                season: document.getElementById('valSeason').value,
+                trip_duration_days: parseInt(document.getElementById('valDuration').value)
+            };
+
+            updateState("در حال پردازش شناختی توسط مدل‌های زبانی (LLM)...", true);
+            try {
+                const res = await fetch(`${routeBase}/recommend/places/score/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataPacket)
+                });
+                const json = await res.json();
+                if (res.ok && json.scored_places) buildOutput(json.scored_places, 'place');
+                else updateState("خطا در پردازش الگوریتم امتیازدهی.");
+            } catch (e) { updateState("طولانی شدن زمان پردازش منجر به قطع ارتباط شد (Timeout)."); }
+        }
+    </script>
 </body>
 </html>
