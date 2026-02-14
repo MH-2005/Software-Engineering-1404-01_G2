@@ -15,7 +15,7 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
-TEAM_APPS = [s.strip() for s in env("TEAM_APPS", default="team1,team2,team3,team4,team5,team6,team7,team8,team9").split(",") if s.strip()]
+TEAM_APPS = [s.strip() for s in env("TEAM_APPS", default="team1,team2,team3,team4,team5,team6,team7,team8,team9,team10,team11,team12,team13").split(",") if s.strip()]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -27,6 +27,7 @@ INSTALLED_APPS = [
 
     # 3rd-party
     "corsheaders",
+    "rest_framework",
 
     # Local
     "core",
@@ -123,3 +124,13 @@ else:
 
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="")
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+GEMINI_API_KEY = env("GEMINI_API_KEY", default=None)
+ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", default="http://localhost:9200")
+TEAM2_FRONT_URL = env("TEAM2_FRONT_URL")
