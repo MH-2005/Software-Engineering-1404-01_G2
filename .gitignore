@@ -22,6 +22,3 @@ media/
 node_modules/
 dist/
 build/
-
-# IDE
-.idea/
